@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sort Visualizer - Ultimate Edition</title>
+  <title>Sort Visualizer</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,17 +15,19 @@
     rel="stylesheet">
 
   <style>
+    /* --- RESTORED CYBERPUNK THEME --- */
     :root {
       --bg-color: #0d1117;
-      --panel-bg: rgba(22, 27, 34, 0.9);
+      --panel-bg: rgba(22, 27, 34, 0.8);
       --accent-color: #58a6ff;
       --highlight-color: #d2a8ff;
       --bar-default: #238636;
       --bar-compare: #d29922;
       --bar-swap: #f85149;
-      --bar-overwrite: #f0883e;
+      --bar-sorted: #a371f7;
       --text-main: #c9d1d9;
-      --neon-glow: 0 0 15px rgba(88, 166, 255, 0.4);
+      --code-bg: #0d1117;
+      --neon-glow: 0 0 10px rgba(88, 166, 255, 0.5);
     }
 
     body {
@@ -34,9 +36,8 @@
       padding: 0;
       background-color: var(--bg-color);
       color: var(--text-main);
-      background-image:
-        radial-gradient(at 0% 0%, rgba(88, 166, 255, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(210, 168, 255, 0.15) 0px, transparent 50%);
+      background-image: radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(210, 168, 255, 0.1) 0%, transparent 20%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -50,211 +51,140 @@
       justify-content: center;
       gap: 30px;
       margin-top: 30px;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
 
     .logo-img {
-      width: 140px;
-      height: 140px;
+      width: 130px;
+      height: 130px;
       object-fit: cover;
       border-radius: 50%;
-      border: 4px solid var(--accent-color);
-      box-shadow: 0 0 20px var(--accent-color);
+      border: 3px solid var(--accent-color);
+      box-shadow: 0 0 15px var(--accent-color);
       transition: transform 0.3s;
     }
 
     .logo-img:hover {
-      transform: scale(1.05) rotate(5deg);
+      transform: scale(1.05);
     }
 
     h1 {
       font-family: 'Press Start 2P', cursive;
       color: var(--accent-color);
       text-shadow: 4px 4px 0px #053a11;
-      font-size: 2.2rem;
-      line-height: 1.4;
-      max-width: 600px;
+      font-size: 2rem;
+      line-height: 1.5;
       text-align: center;
     }
 
-    /* --- Mascot (Friendly Wizard) --- */
-    #mascot-container {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      display: flex;
-      align-items: flex-end;
-      gap: 15px;
-      z-index: 100;
-      pointer-events: none;
-    }
-
-    #mascot-bubble {
-      background: white;
-      color: #222;
-      padding: 20px;
-      border-radius: 25px 25px 0 25px;
-      font-family: 'Fredoka', sans-serif;
-      font-weight: 600;
-      font-size: 16px;
-      line-height: 1.4;
-      max-width: 250px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.3s, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    #mascot-bubble.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    #mascot-char {
-      font-size: 90px;
-      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.4));
-      animation: float 4s ease-in-out infinite;
-      transform-origin: bottom center;
-    }
-
-    @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0) rotate(0deg);
-      }
-
-      50% {
-        transform: translateY(-15px) rotate(2deg);
-      }
-    }
-
-    /* --- Panels --- */
+    /* --- Layout --- */
     .main-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 25px;
-      width: 90%;
+      gap: 20px;
+      width: 95%;
       max-width: 1400px;
       justify-content: center;
-      margin-bottom: 50px;
+      padding-bottom: 100px;
+      /* Space for mascot */
     }
 
     .glass-panel {
       background: var(--panel-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      padding: 25px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
       display: flex;
       flex-direction: column;
     }
 
     #visualizer-panel {
-      flex: 5;
-      min-width: 450px;
+      flex: 3;
+      min-width: 400px;
       align-items: center;
-      min-height: 500px;
+      min-height: 450px;
     }
 
     #code-panel-container {
-      flex: 2;
+      flex: 1;
       min-width: 350px;
-      height: 650px;
-      /* Fixed height for scroll */
+      height: 600px;
     }
 
     /* --- Controls --- */
-    .controls-wrapper {
+    .controls-row {
       width: 100%;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      justify-content: center;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 15px;
       margin-bottom: 20px;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 12px;
+      align-items: center;
     }
 
     .control-btn {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg-color);
       border: 2px solid var(--accent-color);
       color: var(--accent-color);
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-family: 'Fredoka', cursive;
-      font-weight: 700;
-      font-size: 14px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      /* Consistently small retro font */
       cursor: pointer;
       transition: all 0.2s;
       display: flex;
       align-items: center;
       gap: 8px;
+      text-transform: uppercase;
     }
 
-    .control-btn:hover:not(:disabled) {
+    .control-btn:hover {
       background: var(--accent-color);
-      color: #000;
-      transform: translateY(-3px);
+      color: var(--bg-color);
+      transform: translateY(-2px);
       box-shadow: var(--neon-glow);
     }
 
-    .control-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      border-color: #555;
-      color: #555;
+    .control-btn:active {
+      transform: translateY(0);
     }
 
-    .control-btn.primary {
-      background: var(--accent-color);
-      color: #051d38;
+    select {
+      background: var(--bg-color);
+      border: 2px solid var(--highlight-color);
+      color: var(--highlight-color);
+      padding: 10px;
+      border-radius: 8px;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
     }
 
-    .control-btn.primary:hover {
-      background: #80c2ff;
-      color: #000;
-    }
-
-    /* Speed Control */
-    .speed-control {
+    /* Speed Slider */
+    .speed-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       background: rgba(0, 0, 0, 0.3);
-      padding: 5px 15px;
-      border-radius: 10px;
+      padding: 5px 10px;
+      border-radius: 8px;
     }
 
     .speed-label {
       font-family: 'Fira Code', monospace;
-      font-size: 12px;
+      font-size: 10px;
       color: var(--highlight-color);
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
 
     input[type=range] {
-      width: 120px;
-      accent-color: var(--highlight-color);
+      accent-color: var(--bar-compare);
+      width: 100px;
       cursor: pointer;
-    }
-
-    select {
-      background: rgba(0, 0, 0, 0.3);
-      border: 2px solid var(--bar-compare);
-      color: var(--bar-compare);
-      padding: 12px;
-      border-radius: 12px;
-      font-family: 'Fredoka', sans-serif;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      outline: none;
     }
 
     /* --- Array Bars --- */
@@ -264,20 +194,20 @@
       align-items: flex-end;
       justify-content: center;
       width: 100%;
+      height: 350px;
       gap: 4px;
-      /* padding-bottom: 20px; */
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
     }
 
     .array-bar {
       flex: 1;
       background-color: var(--bar-default);
-      border-radius: 6px 6px 0 0;
-      box-shadow: inset 0 -2px 5px rgba(0, 0, 0, 0.3);
-      transition: background-color 0.1s;
-      position: relative;
-    }
+      border-radius: 4px 4px 0 0;
+      box-shadow: 0 0 5px var(--bar-default);
 
-    /* Text inside bar for small arrays? No, too cluttered. Tooltip on hover maybe */
+      /* CRITICAL FOR SMOOTH ANIMATION */
+      transition: height 0.1s linear, background-color 0.1s;
+    }
 
     .array-bar.compare {
       background-color: var(--bar-compare);
@@ -289,30 +219,18 @@
       box-shadow: 0 0 15px var(--bar-swap);
     }
 
-    .array-bar.overwrite {
-      background-color: var(--bar-overwrite);
-    }
-
     .array-bar.sorted {
       background-color: var(--highlight-color);
       box-shadow: 0 0 10px var(--highlight-color);
     }
 
     /* --- Code Panel --- */
-    h3.panel-title {
-      margin: 0 0 15px 0;
-      color: var(--text-main);
-      font-family: 'Press Start 2P';
-      font-size: 12px;
-      text-transform: uppercase;
-      border-bottom: 2px solid #333;
-      padding-bottom: 10px;
-    }
-
     #code-display {
       font-family: 'Fira Code', monospace;
       font-size: 13px;
       line-height: 1.6;
+      background: #000;
+      padding: 15px;
       border-radius: 8px;
       overflow-y: auto;
       flex-grow: 1;
@@ -320,46 +238,77 @@
     }
 
     .code-line {
-      padding: 2px 10px;
-      margin: 2px 0;
-      border-radius: 4px;
+      display: block;
+      padding: 0 5px;
       border-left: 3px solid transparent;
-      opacity: 0.6;
     }
 
     .code-line.active {
-      background-color: rgba(210, 168, 255, 0.15);
+      background-color: rgba(210, 168, 255, 0.2);
       border-left-color: var(--highlight-color);
       color: #fff;
-      opacity: 1;
+      text-shadow: 0 0 2px var(--highlight-color);
       font-weight: bold;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
-    /* Current Step Info */
     #explanation {
-      margin-top: 15px;
-      font-size: 18px;
-      font-weight: 600;
-      text-align: center;
-      color: var(--accent-color);
-      min-height: 30px;
-    }
-
-    #progress-bar {
-      width: 100%;
-      height: 6px;
-      background: #222;
-      border-radius: 3px;
       margin-top: 20px;
-      overflow: hidden;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      color: var(--text-main);
+      min-height: 30px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
 
-    #progress-fill {
-      height: 100%;
-      background: var(--accent-color);
-      width: 0%;
-      transition: width 0.1s linear;
+    /* --- Mascot --- */
+    #mascot-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      align-items: flex-end;
+      gap: 15px;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    #mascot-bubble {
+      background: white;
+      color: #222;
+      padding: 15px;
+      border-radius: 20px 20px 0 20px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      line-height: 1.5;
+      max-width: 200px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    #mascot-bubble.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #mascot-char {
+      font-size: 80px;
+      filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
     }
   </style>
 </head>
@@ -367,16 +316,15 @@
 <body>
 
   <div class="header-container">
-    <img src="ravenclaw.png" alt="Ravenclaw" class="logo-img"
+    <img src="ravenclaw.png" alt="Logo" class="logo-img"
       onerror="this.src='https://upload.wikimedia.org/wikipedia/en/thumb/3/33/Ravenclaw_Crest.png/220px-Ravenclaw_Crest.png'">
-    <h1>Sort Visualizer<br><span style="font-size: 0.5em; color: #fff; font-family: 'Fredoka'">Ultimate Edition</span>
-    </h1>
+    <h1>Sort Visualizer</h1>
   </div>
 
   <div class="main-container">
     <div id="visualizer-panel" class="glass-panel">
 
-      <div class="controls-wrapper">
+      <div class="controls-row">
         <select id="algo-select" onchange="resetController()">
           <option value="bubble">Bubble Sort</option>
           <option value="insertion">Insertion Sort</option>
@@ -387,47 +335,38 @@
           <option value="radix">Radix Sort</option>
         </select>
 
-        <div class="btn-group">
-          <button class="control-btn" onclick="resetController()">Reset 🔄</button>
-          <button class="control-btn" onclick="prevStep()">⏪</button>
-          <button class="control-btn primary" id="play-btn" onclick="togglePlay()">Start Magic! ✨</button>
-          <button class="control-btn" onclick="nextStep()">⏩</button>
-        </div>
+        <button class="control-btn" onclick="resetController()">Reset 🔄</button>
+        <button class="control-btn" onclick="prevStep()">Example ⏮️</button>
+        <button class="control-btn" id="play-btn" onclick="togglePlay()">Start ✨</button>
+        <button class="control-btn" onclick="nextStep()">Next ⏭️</button>
 
-        <div class="speed-control">
+        <div class="speed-container">
           <div class="speed-label" id="speed-label">Speed: 1.0x</div>
           <input type="range" id="speed" min="1" max="50" value="10" oninput="updateSpeed()">
         </div>
       </div>
 
       <div id="array-container"></div>
-
-      <div id="explanation">Ready to Sort!</div>
-      <div id="progress-bar">
-        <div id="progress-fill"></div>
-      </div>
+      <div id="explanation">Ready to sort!</div>
 
     </div>
 
     <div id="code-panel-container" class="glass-panel">
-      <h3 class="panel-title">Python Code Trace</h3>
+      <h3
+        style="margin-top:0; color: var(--accent-color); font-family: 'Press Start 2P'; font-size: 14px; text-align:center;">
+        PYTHON TRACE</h3>
       <div id="code-display"></div>
     </div>
   </div>
 
-  <!-- Animated Mascot -->
   <div id="mascot-container">
-    <div id="mascot-bubble">Welcome! I'm Merlin. Let's sort some magic bars! 🧙‍♂️</div>
+    <div id="mascot-bubble">Hello! I'm Merlin. Let's sort! 🧙‍♂️</div>
     <div id="mascot-char">🧙‍♂️</div>
   </div>
 
   <script>
-    /* --- Architecture: Record & Play --- 
-       Instead of async/await, we calculate ALL frames first, then just render index i.
-    */
-
     /* --- State --- */
-    const ARRAY_SIZE = 30;
+    const ARRAY_SIZE = 20; // Lower count for bigger bars
     let initialArray = [];
     let frames = [];
     let currentFrameIndex = 0;
@@ -441,9 +380,8 @@
     const mascotBubble = document.getElementById('mascot-bubble');
     const mascotChar = document.getElementById('mascot-char');
     const playBtn = document.getElementById('play-btn');
-    const progressFill = document.getElementById('progress-fill');
 
-    /* --- Python Code Snippets --- */
+    /* --- Python Snippets --- */
     const codeSnippets = {
       bubble:
         `def bubble_sort(arr):
@@ -451,8 +389,7 @@
     for i in range(n - 1):
         for j in range(n - i - 1):
             if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
-    return arr`,
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]`,
 
       insertion:
         `def insertion_sort(arr):
@@ -475,22 +412,16 @@
 
       merge:
         `def merge_sort(left, right):
-    # Standard Recursive Implementation
     if len(arr) > 1:
         mid = len(arr) // 2
-        L = arr[:mid]
-        R = arr[mid:]
+        L = arr[:mid]; R = arr[mid:]
         merge_sort(L)
         merge_sort(R)
-        
         i = j = k = 0
         while i < len(L) and j < len(R):
-            if L[i] < R[j]:
-                arr[k] = L[i]; i += 1
-            else:
-                arr[k] = R[j]; j += 1
+            if L[i] < R[j]: arr[k] = L[i]; i += 1
+            else: arr[k] = R[j]; j += 1
             k += 1
-        # Check remaining
         while i < len(L): ...
         while j < len(R): ...`,
 
@@ -519,7 +450,7 @@ def partition(arr, low, high):
     for i in range(n - 1, 0, -1):
         arr[i], arr[0] = arr[0], arr[i]
         heapify(arr, i, 0)
-
+    
 def heapify(arr, n, i):
     largest = i
     l = 2 * i + 1; r = 2 * i + 2
@@ -535,55 +466,45 @@ def heapify(arr, n, i):
     exp = 1
     while max_val // exp > 0:
         counting_sort(arr, exp)
-        exp *= 10
-
-def counting_sort(arr, exp):
-    n = len(arr)
-    output = [0] * n
-    count = [0] * 10
-    for i in range(n):
-        index = (arr[i] // exp)
-        count[index % 10] += 1
-    for i in range(1, 10):
-        count[i] += count[i - 1]
-    i = n - 1
-    while i >= 0:
-        index = (arr[i] // exp)
-        output[count[index % 10] - 1] = arr[i]
-        count[index % 10] -= 1
-        i -= 1
-    for i in range(n):
-        arr[i] = output[i]`
+        exp *= 10`
     };
 
-    /* --- Initialization --- */
+    /* --- Logic --- */
     window.onload = resetController;
 
     function resetController() {
       pause();
-      // Generate new array
       initialArray = [];
-      for (let i = 0; i < ARRAY_SIZE; i++) {
-        initialArray.push(Math.floor(Math.random() * 90) + 10);
-      }
+      container.innerHTML = '';
 
-      // Render Code
-      const algo = document.getElementById('algo-select').value;
-      const codeLines = codeSnippets[algo].split('\\n');
-      codeDisplay.innerHTML = '';
-      codeLines.forEach((line, i) => {
-        const d = document.createElement('div');
-        d.className = 'code-line';
-        d.id = \`line-\${i+1}\`;
+      // Generate and CREATE DOM bars once
+      for (let i = 0; i < ARRAY_SIZE; i++) {
+        const val = Math.floor(Math.random() * 80) + 10;
+        initialArray.push(val);
+
+        const bar = document.createElement('div');
+        bar.className = 'array-bar';
+        bar.id = \`bar-\${i}\`; // Important for reuse
+            bar.style.height = \`\${val * 3}px\`;
+            container.appendChild(bar);
+        }
+        
+        // Render Code
+        const algo = document.getElementById('algo-select').value;
+        const codeLines = codeSnippets[algo].split('\\n');
+        codeDisplay.innerHTML = '';
+        codeLines.forEach((line, i) => {
+            const d = document.createElement('div');
+            d.className = 'code-line';
+            d.id = \`line-\${i+1}\`;
             d.innerText = line;
             codeDisplay.appendChild(d);
         });
 
-        // Record Frames
+        // Record
         frames = [];
         const recorder = new Recorder([...initialArray]);
         
-        // Call Sort Algo
         if(algo === 'bubble') bubbleSort(recorder);
         if(algo === 'insertion') insertionSort(recorder);
         if(algo === 'selection') selectionSort(recorder);
@@ -592,36 +513,30 @@ def counting_sort(arr, exp):
         if(algo === 'heap') heapSort(recorder);
         if(algo === 'radix') radixSort(recorder);
         
-        // Add final "Done" frame
-        recorder.addFrame(null, [], 'Sorted!', 'sorted', 0);
+        recorder.addFrame(null, [], 'Sorted!', 'sorted');
         frames = recorder.frames;
         
-        // Reset View
         currentFrameIndex = 0;
-        renderFrame(0);
+        updateView(0);
         updateSpeed();
         setMascot('idle', "Ready!");
     }
 
-    /* --- Recorder Class --- */
+    /* --- Recorder --- */
     class Recorder {
         constructor(array) {
-            this.array = [...array]; // Current state
+            this.array = [...array];
             this.frames = [];
-            // Initial Frame
-            this.addFrame(null, [], "Ready to start", 'idle', 0);
+            this.addFrame(null, [], "Ready");
         }
         
-        // Save a snapshot
-        // highlights: [{ index, type: 'compare'|'swap'|'sorted' }]
         addFrame(lineNum, highlights, text, mascot, sortedCount=0) {
             this.frames.push({
                 arrayState: [...this.array],
                 line: lineNum,
                 highlights: highlights || [],
                 text: text || "",
-                mascot: mascot || 'idle',
-                sortedCount: sortedCount
+                mascot: mascot || 'idle'
             });
         }
 
@@ -640,26 +555,22 @@ def counting_sort(arr, exp):
 
         overwrite(i, val, line, text="Overwriting") {
              this.array[i] = val;
-             this.addFrame(line, [{index:i, type:'overwrite'}], text, 'swap');
+             this.addFrame(line, [{index:i, type:'swap'}], text, 'swap');
         }
     }
-
-    /* --- Sorting Algorithms (Synchronous Recording) --- */
-    // Note: These must match line numbers in codeSnippets roughly
-
+    
+    /* --- Sorts --- */
     function bubbleSort(rec) {
         let n = rec.array.length;
-        rec.addFrame(1, [], "Start Bubble Sort");
+        rec.addFrame(1);
         for (let i = 0; i < n - 1; i++) {
-            rec.addFrame(3, [], "Next Pass");
+            rec.addFrame(3);
             for (let j = 0; j < n - i - 1; j++) {
                 rec.addFrame(4);
                 if (rec.compare(j, j+1, 5) > 0) {
                     rec.swap(j, j+1, 6);
                 }
             }
-            // Mark end as sorted logic handled by renderer implicitly? 
-            // We can add a "sorted" highlight type for static sorted bars
         }
     }
 
@@ -674,11 +585,11 @@ def counting_sort(arr, exp):
             
             rec.addFrame(5);
             while (j >= 0 && rec.array[j] > key) {
-                rec.addFrame(5, [{index:j, type:'compare'}], \`\${rec.array[j]} > \${key}\`);
+                rec.addFrame(5, [{index:j, type:'compare'}]);
                 rec.overwrite(j + 1, rec.array[j], 6, "Shifting");
                 j--;
             }
-            rec.array[j + 1] = key; // Manual write
+            rec.array[j + 1] = key;
             rec.addFrame(8, [{index:j+1, type:'swap'}], "Inserting Key");
         }
     }
@@ -688,12 +599,12 @@ def counting_sort(arr, exp):
         rec.addFrame(1);
         for(let i=0; i<n; i++) {
             let minIdx = i;
-            rec.addFrame(3, [{index:i, type:'sorted'}], "Current Min");
+            rec.addFrame(3, [{index:i, type:'sorted'}]);
             for(let j=i+1; j<n; j++) {
                 rec.addFrame(5, [{index:j, type:'compare'}, {index:minIdx, type:'sorted'}]);
                 if(rec.array[j] < rec.array[minIdx]) {
                     minIdx = j;
-                    rec.addFrame(6, [{index:minIdx, type:'swap'}], "New Minimum Found!");
+                    rec.addFrame(6, [{index:minIdx, type:'swap'}], "New Minimum!");
                 }
             }
             if(minIdx !== i) rec.swap(i, minIdx, 8);
@@ -711,16 +622,16 @@ def counting_sort(arr, exp):
     
     function partition(rec, low, high) {
         let pivot = rec.array[high];
-        rec.addFrame(8, [{index:high, type:'swap'}], \`Pivot: \${pivot}\`);
+        rec.addFrame(8, [{index:high, type:'swap'}]);
         let i = low - 1;
         for(let j=low; j < high; j++) {
             rec.addFrame(10, [{index:j, type:'compare'}, {index:high, type:'swap'}]);
             if(rec.array[j] <= pivot) {
                 i++;
-                rec.swap(i, j, 12, "Swapping smaller element");
+                rec.swap(i, j, 12);
             }
         }
-        rec.swap(i+1, high, 13, "Placing pivot");
+        rec.swap(i+1, high, 13);
         return i+1;
     }
 
@@ -733,34 +644,26 @@ def counting_sort(arr, exp):
     }
 
     function merge(rec, left, mid, right) {
-        // Simplified visualization: Just show the overwrite steps
         let temp = [];
         let i = left, j = mid+1;
         while(i <= mid && j <= right) {
              rec.addFrame(10, [{index:i, type:'compare'}, {index:j, type:'compare'}]);
-             if(rec.array[i] <= rec.array[j]) {
-                 temp.push(rec.array[i++]);
-             } else {
-                 temp.push(rec.array[j++]);
-             }
+             if(rec.array[i] <= rec.array[j]) temp.push(rec.array[i++]);
+             else temp.push(rec.array[j++]);
         }
         while(i <= mid) temp.push(rec.array[i++]);
         while(j <= right) temp.push(rec.array[j++]);
         
-        // Write back
         for(let k=0; k<temp.length; k++) {
-            rec.overwrite(left+k, temp[k], 14, "Merging sorted value");
+            rec.overwrite(left+k, temp[k], 14, "Merging");
         }
     }
     
     function heapSort(rec) {
         let n = rec.array.length;
-        // Build heap
         for (let i = Math.floor(n/2)-1; i >= 0; i--) heapify(rec, n, i);
-        
-        // Extract
         for (let i = n-1; i > 0; i--) {
-            rec.swap(0, i, 6, "Move max to end");
+            rec.swap(0, i, 6);
             heapify(rec, i, 0);
         }
     }
@@ -769,12 +672,10 @@ def counting_sort(arr, exp):
         let largest = i;
         let l = 2*i + 1, r = 2*i + 2;
         rec.addFrame(11, [{index:i, type:'compare'}]);
-        
         if(l < n && rec.array[l] > rec.array[largest]) largest = l;
         if(r < n && rec.array[r] > rec.array[largest]) largest = r;
-        
         if(largest !== i) {
-            rec.swap(i, largest, 15, "Fixing Heap Property");
+            rec.swap(i, largest, 15);
             heapify(rec, n, largest);
         }
     }
@@ -793,49 +694,51 @@ def counting_sort(arr, exp):
          let n = rec.array.length;
          let output = new Array(n).fill(0);
          let count = new Array(10).fill(0);
-         
-         // Visual limitation: Radix is hard to show in-place. We will just show the final write back for this pass.
-         rec.addFrame(10, [], \`Sorting digit place: \${exp}\`);
-         
+         rec.addFrame(10, [], \`Digit: \${exp}\`);
          for(let i=0; i<n; i++) count[Math.floor(rec.array[i]/exp)%10]++;
          for(let i=1; i<10; i++) count[i] += count[i-1];
-         
          for(let i=n-1; i>=0; i--) {
              let idx = Math.floor(rec.array[i]/exp)%10;
              output[count[idx]-1] = rec.array[i];
              count[idx]--;
          }
-         
          for(let i=0; i<n; i++) {
-             rec.overwrite(i, output[i], 24, "Rebuilding array based on digit");
+             rec.overwrite(i, output[i], 24);
          }
     }
 
-
-    /* --- Player Logic --- */
-    function renderFrame(index) {
+    /* --- Player (Optimized for CSS Transitions) --- */
+    
+    function updateView(index) {
         if(index < 0 || index >= frames.length) return;
         const frame = frames[index];
         const prevFrame = frames[index-1];
         
-        // Render Array
-        container.innerHTML = '';
-        frame.arrayState.forEach((val, idx) => {
-            const bar = document.createElement('div');
-            bar.className = 'array-bar';
-            bar.style.height = \`\${val * 3}px\`;
+        // Update DOM elements instead of replacing them
+        // This preserves the CSS transition state
+        const bars = container.children;
+        for(let i=0; i<bars.length; i++) {
+            const bar = bars[i];
+            const newVal = frame.arrayState[i];
+            const currentH = parseInt(bar.style.height);
             
-            // Check highlights
-            const hl = frame.highlights.find(h => h.index === idx);
+            // Only update height if changed
+            if(Math.abs(currentH/3 - newVal) > 0.1) {
+                 bar.style.height = \`\${newVal * 3}px\`;
+            }
+
+            // Reset classes
+            bar.className = 'array-bar';
+            
+            // Highlights
+            const hl = frame.highlights.find(h => h.index === i);
             if(hl) bar.classList.add(hl.type);
             
-            // Heuristic for "Sorted": if frame is final, or bubbled to end
-            if(index === frames.length-1) bar.classList.add('sorted');
-            
-            container.appendChild(bar);
-        });
+            // Final state
+            if(index === frames.length - 1) bar.classList.add('sorted');
+        }
         
-        // Render Code Highlight
+        // Code lines
         document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
         if(frame.line) {
              const el = document.getElementById(\`line-\${frame.line}\`);
@@ -845,15 +748,10 @@ def counting_sort(arr, exp):
              }
         }
         
-        // Text & Mascot
         explanation.innerText = frame.text;
         if(!prevFrame || frame.mascot !== prevFrame.mascot) {
             setMascot(frame.mascot);
         }
-        
-        // Progress
-        const pct = ((index+1) / frames.length) * 100;
-        progressFill.style.width = \`\${pct}%\`;
     }
 
     function togglePlay() {
@@ -873,7 +771,7 @@ def counting_sort(arr, exp):
                 currentFrameIndex = frames.length - 1;
                 setMascot('sorted', "Done!");
             }
-            renderFrame(currentFrameIndex);
+            updateView(currentFrameIndex);
         }, frameRate);
     }
 
@@ -887,7 +785,7 @@ def counting_sort(arr, exp):
         pause();
         if(currentFrameIndex > 0) {
             currentFrameIndex--;
-            renderFrame(currentFrameIndex);
+            updateView(currentFrameIndex);
         }
     }
 
@@ -895,18 +793,19 @@ def counting_sort(arr, exp):
         pause();
         if(currentFrameIndex < frames.length - 1) {
             currentFrameIndex++;
-            renderFrame(currentFrameIndex);
+            updateView(currentFrameIndex);
         }
     }
     
     function updateSpeed() {
-        const val = parseInt(document.getElementById('speed').value); // 1 to 50
-        // val=1 => speed=1000ms, val=50 => speed=20ms
-        // Formula: 1000 / val
+        const val = parseInt(document.getElementById('speed').value);
         const multi = (val / 10).toFixed(1);
         document.getElementById('speed-label').innerText = \`Speed: \${multi}x\`;
         
         frameRate = 1000 / val;
+        
+        // Update transition speed in CSS based on speed?
+        // Actually, fixed 0.1s transition is usually good for most speeds.
         
         if(isPlaying) {
             pause();
@@ -917,8 +816,8 @@ def counting_sort(arr, exp):
     const mascotData = {
         idle: { char: "🧙‍♂️", phrases: ["Magic time!", "Ready to cast!", "Observe..."] },
         compare: { char: "👀", phrases: ["Analysing...", "Which is bigger?"] },
-        swap: { char: "✨", phrases: ["Swish and Flick!", "Transform!", "Switch!"] },
-        sorted: { char: "🎉", phrases: ["Magical!", "Perfection!", "Sorted!"] }
+        swap: { char: "✨", phrases: ["Swish!", "Transform!", "Switch!"] },
+        sorted: { char: "🎉", phrases: ["Simply Magical!", "Perfection!", "Sorted!"] }
     }
 
     function setMascot(state, overrideText) {
@@ -926,9 +825,6 @@ def counting_sort(arr, exp):
         mascotChar.innerText = data.char;
         mascotBubble.innerText = overrideText || data.phrases[Math.floor(Math.random()*data.phrases.length)];
         mascotBubble.classList.add('show');
-        
-        // Auto hide after 2s if playing
-        // setTimeout(() => mascotBubble.classList.remove('show'), 2000);
     }
 
   </script>
