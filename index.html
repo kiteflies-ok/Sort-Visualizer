@@ -4,776 +4,795 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sorting Algorithm Visualizer</title>
+  <title>Sort Visualizer - Python Edition</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Fredoka:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --bg-color: #0d1117;
+      --panel-bg: rgba(22, 27, 34, 0.8);
+      --accent-color: #58a6ff;
+      --highlight-color: #d2a8ff;
+      --bar-default: #238636;
+      --bar-compare: #d29922;
+      --bar-swap: #f85149;
+      --text-main: #c9d1d9;
+      --code-bg: #0d1117;
+      --neon-glow: 0 0 10px rgba(88, 166, 255, 0.5);
+    }
+
     body {
-      font-family: "Times New Roman", Times, serif;
-      margin: 20px;
-      background-color: #0e0414;
-    }
-
-    #container {
-      display: flex;
-      gap: 20px;
-      margin-top: 50px;
-    }
-
-    .logo-container {
-      position: fixed;
-      border-radius: 15px;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
-      transition: transform 0.3s ease;
-    }
-
-    .animated-logo {
-      width: 170px;
-      height: auto;
-      border-radius: 80px;
-      animation: bounce 3s infinite;
-    }
-
-    .logo-container:hover {
-      transform: scale(1.1);
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    .animated-heading {
-      font-size: 3.5rem;
-      text-align: center;
-      background: linear-gradient(45deg, #e7e41e, #ec0063, #e41010);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      animation: float 3s ease-in-out infinite;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-      font-family: "Times New Roman", Times, serif;
-      transition: transform 0.3s ease;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    .animated-heading:hover {
-      transform: scale(1.05);
-      cursor: pointer;
-    }
-
-    #visualization {
-      flex: 2;
-      background: rgb(243, 242, 161);
+      font-family: 'Fredoka', sans-serif;
+      margin: 0;
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      background-image: radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.1) 0%, transparent 20%),
+                        radial-gradient(circle at 90% 80%, rgba(210, 168, 255, 0.1) 0%, transparent 20%);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
     }
 
-    #algorithm-explanation {
-      font-size: 1.2rem;
+    /* --- Mascot --- */
+    #mascot-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        z-index: 100;
+        pointer-events: none; /* Let clicks pass through */
+    }
+
+    #mascot-bubble {
+        background: white;
+        color: #333;
+        padding: 15px;
+        border-radius: 20px 20px 0 20px;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 12px;
+        line-height: 1.5;
+        max-width: 250px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.3s, transform 0.3s;
+    }
+
+    #mascot-bubble.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    #mascot-char {
+        font-size: 60px;
+        filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+
+    /* --- Layout --- */
+    h1 {
+      font-family: 'Press Start 2P', cursive;
       text-align: center;
-      color: #000;
-      font-weight: bold;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      color: var(--accent-color);
+      text-shadow: 4px 4px 0px #238636;
+      margin-bottom: 30px;
+      font-size: 2rem;
+      line-height: 1.5;
+    }
+
+    .main-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
       width: 100%;
+      max-width: 1200px;
+      justify-content: center;
     }
 
-    #code-panel {
+    /* --- Panels --- */
+    .glass-panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    #visualizer-panel {
+      flex: 2;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 400px;
+    }
+
+    #code-panel-container {
       flex: 1;
-      background: #423899;
-      color: #b8c5dd;
-      padding: 15px;
-      border-radius: 8px;
-      overflow: auto;
-      max-height: 400px;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
     }
 
-    .array-element {
-      display: inline-block;
-      background: #e22684;
-      margin: 2px;
-      font-size: 16px;
-      padding: 10px;
-      color: rgb(223, 213, 84);
-      transition: all 0.3s;
-    }
-
+    /* --- Controls --- */
     .controls {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
+      justify-content: center;
       margin-bottom: 20px;
     }
 
-    button {
-      padding: 1em 2em;
-      background: linear-gradient(45deg, #ff8432, #e100ff, #22d8cc);
-      border: none;
-      color: rgb(251, 255, 15);
-      font-weight: bold;
-      font-size: 25px;
-      border-radius: 1000px;
-      font-family: "Gill Sans", sans-serif;
+    .control-btn {
+      background: var(--bg-color);
+      border: 2px solid var(--accent-color);
+      color: var(--accent-color);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
       cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      transition: all 0.2s;
+      text-transform: uppercase;
     }
 
-    button:hover {
-      z-index: 0;
-      box-shadow: 40px 0 100px;
-      background: linear-gradient(45deg, #ff8432, #e100ff, #22d8cc);
+    .control-btn:hover {
+      background: var(--accent-color);
+      color: var(--bg-color);
+      transform: translateY(-2px);
+      box-shadow: var(--neon-glow);
     }
 
     select {
-      padding: 16px 32px;
-      font-size: 25px;
-      border: 4px solid #2b2525;
-      color: rgb(255, 238, 0);
+      background: var(--bg-color);
+      border: 2px solid var(--highlight-color);
+      color: var(--highlight-color);
+      padding: 10px;
+      border-radius: 8px;
+      font-family: 'Fredoka', sans-serif;
       font-weight: bold;
-      font-family: monospace;
-      background: linear-gradient(45deg, #ff8432, #e100ff, #22d8cc);
       cursor: pointer;
-      transition: all 0.3s ease;
-      border-radius: 4px;
     }
 
-    select:hover {
-      background: linear-gradient(45deg, #d9f827, #45b7d1);
-      border-color: #45b7d1;
-      color: rgb(0, 115, 209);
-      box-shadow: 0 4px 15px rgba(79, 192, 210, 0.3);
+    input[type=range] {
+      accent-color: var(--bar-compare);
+    }
+
+    /* --- Array Bars --- */
+    #array-container {
+      display: flex;
+      align-items: flex-end; /* Align bars to bottom */
+      justify-content: center;
+      height: 300px;
+      width: 100%;
+      gap: 4px;
+      margin-top: 20px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .array-bar {
+      width: 20px;
+      background-color: var(--bar-default);
+      transition: height 0.2s ease, background-color 0.2s;
+      border-radius: 4px 4px 0 0;
+      box-shadow: 0 0 5px var(--bar-default); 
+      /* No text inside bars to keep it clean, can add tooltip if needed */
+    }
+
+    .array-bar.compare {
+      background-color: var(--bar-compare);
+      box-shadow: 0 0 10px var(--bar-compare);
+    }
+
+    .array-bar.swap {
+      background-color: var(--bar-swap);
+      box-shadow: 0 0 15px var(--bar-swap);
+    }
+
+    .array-bar.sorted {
+      background-color: var(--highlight-color);
+      box-shadow: 0 0 10px var(--highlight-color);
+    }
+
+    /* --- Code Panel --- */
+    #code-display {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      background: #000;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .code-line {
+      display: block;
+      padding: 0 5px;
+      border-left: 3px solid transparent;
+    }
+
+    .code-line.active {
+      background-color: rgba(210, 168, 255, 0.2);
+      border-left-color: var(--highlight-color);
+      color: #fff;
+      text-shadow: 0 0 2px var(--highlight-color);
     }
 
     #explanation {
-      margin-top: 20px;
-      font-size: 1.5rem;
+      margin-top: 15px;
+      font-size: 1.1rem;
       text-align: center;
-      color: #000;
-      font-weight: bold;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      color: var(--text-main);
+      min-height: 50px;
+    }
+    
+    /* Decoration */
+    .logo-img { 
+        width: 60px; 
+        height: auto; 
+        vertical-align: middle;
+        margin-right: 15px;
+        border-radius: 50%;
+        border: 2px solid var(--accent-color);
     }
 
-   /* .active-line {
-      background-color: rgba(255, 255, 255, 0.2);
-      font-weight: bold;
-    } */
   </style>
 </head>
 <body>
-    
-  <a href="/" class="logo-container">
-    <img src="ravenclaw.png" alt="Website Logo" class="animated-logo" />
-  </a>
 
-  <h1 class="animated-heading">Sorting Algorithm Visualizer</h1>
+  <h1>
+    <img src="ravenclaw.png" alt="" class="logo-img" onerror="this.style.display='none'">
+    Sort Visualizer
+  </h1>
 
-  <div class="controls">
-    <select id="algorithm-select" onchange="updateAlgorithmExplanation()">
+  <div class="controls glass-panel">
+    <select id="algo-select" onchange="updateAlgo()">
       <option value="bubble">Bubble Sort</option>
       <option value="insertion">Insertion Sort</option>
       <option value="selection">Selection Sort</option>
       <option value="merge">Merge Sort</option>
       <option value="quick">Quick Sort</option>
-      <option value="heap">Heap Sort</option>
-      <option value="radix">Radix Sort</option>
     </select>
-
-    <button onclick="startSorting()">Start Magic! ✨</button>
-    <button onclick="pauseResume()">Pause/Resume Magic 🔀</button>
-    <button onclick="reset()">Reset</button>
-    <button onclick="previousStep()">Previous ⏮️</button>
-    <button onclick="nextStep()">Next ⏭️</button>
-    <input type="range" id="speed" min="10" max="1000" value="300" onchange="updateSpeed()" />
-  </div>
-
-  <div id="container">
-    <div id="visualization">
-      <div id="algorithm-explanation"></div>
-      <div id="array-visualization"></div>
+    
+    <button class="control-btn" onclick="generateArray()">Randomize 🎲</button>
+    <button class="control-btn" onclick="startSort()">Start ✨</button>
+    <button class="control-btn" onclick="togglePause()">Pause ⏸️</button>
+    
+    <div style="display: flex; align-items: center; gap: 10px; margin-left: 20px;">
+      <span style="font-family: 'Press Start 2P'; font-size: 10px;">SPEED</span>
+      <input type="range" id="speed" min="50" max="800" value="300" oninput="updateSpeed()">
     </div>
-    <div id="code-panel"></div>
   </div>
 
-  <div id="explanation"></div>
+  <div class="main-container">
+    <div id="visualizer-panel" class="glass-panel">
+      <div id="explanation">Ready to sort! Pick an algorithm.</div>
+      <div id="array-container"></div>
+    </div>
 
-    <script>
-        let array = [];
-        let isSorting = false;
-        let isPaused = false;
-        let delay = 300;
-        let currentStepGenerator = null;
-        let sortingSteps = [];
-        let currentStepIndex = 0;
-        let explanationText = "";
+    <div id="code-panel-container" class="glass-panel">
+      <h3 style="margin-top:0; color: var(--accent-color); font-family: 'Press Start 2P'; font-size: 14px;">PYTHON CODE</h3>
+      <div id="code-display"></div>
+    </div>
+  </div>
 
-        function initializeArray() {
-            array = Array.from({ length: 10 }, () => Math.floor(Math.random() * 50) + 10);
-            sortingSteps = [[...array]];
-            currentStepIndex = 0;
-            explanationText = "Array initialized with random values.";
-            visualizeArray();
-            updateExplanation(explanationText);
-            updateAlgorithmExplanation();
+  <!-- Animated Mascot -->
+  <div id="mascot-container">
+      <div id="mascot-bubble">Hello! I'm PyBot. I'll help you sort!</div>
+      <div id="mascot-char">🤖</div>
+  </div>
+
+  <script>
+    /* --- State --- */
+    let array = [];
+    let isSorting = false;
+    let isPaused = false;
+    let speed = 300;
+    let abortController = null; // To stop async functions
+
+    /* --- DOM Elements --- */
+    const container = document.getElementById('array-container');
+    const codeDisplay = document.getElementById('code-display');
+    const explanation = document.getElementById('explanation');
+    const mascotBubble = document.getElementById('mascot-bubble');
+    const mascotChar = document.getElementById('mascot-char');
+
+    /* --- Python Code Snippets --- */
+    const codeSnippets = {
+      bubble: 
+`def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n - 1):
+        for j in range(n - i - 1):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]`,
+      
+      insertion:
+`def insertion_sort(arr):
+    for i in range(1, len(arr)):
+        key = arr[i]
+        j = i - 1
+        while j >= 0 and arr[j] > key:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key`,
+
+      selection:
+`def selection_sort(arr):
+    for i in range(len(arr)):
+        min_idx = i
+        for j in range(i + 1, len(arr)):
+            if arr[j] < arr[min_idx]:
+                min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]`,
+
+      merge:
+`def merge_sort(left, right):
+    # This visualizer shows the merge step
+    result = []
+    i = j = 0
+    while i < len(left) and j < len(right):
+        if left[i] < right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+    result.extend(left[i:])
+    result.extend(right[j:])`,
+
+      quick:
+`def quick_sort(arr, low, high):
+    if low < high:
+        # Partition step
+        pivot = arr[high]
+        i = low - 1
+        for j in range(low, high):
+            if arr[j] <= pivot:
+                i += 1
+                arr[i], arr[j] = arr[j], arr[i]
+        arr[i+1], arr[high] = arr[high], arr[i+1]`
+    };
+
+    /* --- Mascot Logic --- */
+    const mascotStates = {
+        idle: { char: "🤖", text: ["Ready to crunch data!", "Sort me up, Scotty!", "Python power!"] },
+        compare: { char: "🧐", text: ["Hmm, checking these two...", "Comparing...", "Which is bigger?"] },
+        swap: { char: "⚡", text: ["Zap! Swapping!", "Switcheroo!", "Moving data!"] },
+        sorted: { char: "🎉", text: ["All done!", "Perfectly sorted!", "Victory!"] }
+    };
+
+    function setMascot(stateKey) {
+        const state = mascotStates[stateKey];
+        mascotChar.innerText = state.char;
+        
+        // Random message
+        const text = state.text[Math.floor(Math.random() * state.text.length)];
+        mascotBubble.innerText = text;
+        mascotBubble.classList.add('show');
+        
+        // Hide bubble after 2s if it's a transient state
+        if(stateKey === 'compare' || stateKey === 'swap') {
+             setTimeout(() => mascotBubble.classList.remove('show'), 1500);
+        } else {
+             mascotBubble.classList.add('show');
         }
+    }
 
-        function visualizeArray() {
-            const container = document.getElementById('array-visualization');
-            container.innerHTML = '';
-            array.forEach((value, index) => {
-                const element = document.createElement('div');
-                element.className = 'array-element';
-                element.style.height = `${value * 4}px`;
-                element.textContent = value;
-                container.appendChild(element);
-            });
+    /* --- Initialization --- */
+    function init() {
+        generateArray();
+        updateAlgo();
+    }
+
+    function generateArray(size=20) {
+        if(isSorting) return; // Prevent generating while sorting
+        array = [];
+        container.innerHTML = '';
+        for (let i = 0; i < size; i++) {
+            const val = Math.floor(Math.random() * 80) + 10; // 10-90
+            array.push(val);
+            
+            const bar = document.createElement('div');
+            bar.classList.add('array-bar');
+            bar.style.height = \`\${val * 3}px\`;
+            
+            // Neon colors based on height
+            /* bar.style.backgroundColor = \`hsl(\${val * 3}, 70%, 50%)\`; */
+            
+            container.appendChild(bar);
         }
+        setMascot('idle');
+        explanation.innerText = "Array generated with random values.";
+    }
 
-        function updateExplanation(text) {
-            const explanationDiv = document.getElementById('explanation');
-            explanationDiv.textContent = text;
+    function updateAlgo() {
+        const algo = document.getElementById('algo-select').value;
+        const code = codeSnippets[algo];
+        
+        // Render python code with line numbers
+        codeDisplay.innerHTML = '';
+        const lines = code.split('\\n');
+        lines.forEach((line, idx) => {
+            const lineDiv = document.createElement('div');
+            lineDiv.classList.add('code-line');
+            lineDiv.id = \`line-\${idx + 1}\`;
+            lineDiv.innerText = line; // Preserves whitespace via CSS pre
+            codeDisplay.appendChild(lineDiv);
+        });
+    }
+
+    /* --- Visualization Helpers --- */
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function checkPaused() {
+        while (isPaused) {
+            await sleep(100);
         }
+    }
 
-        function updateAlgorithmExplanation() {
-            const algorithm = document.getElementById('algorithm-select').value;
-            const explanationDiv = document.getElementById('algorithm-explanation');
-            let explanation = '';
-
-            switch (algorithm) {
-                case 'bubble':
-                    explanation = "Bubble Sort works by repeatedly swapping adjacent elements if they are in the wrong order. This process is repeated until the array is sorted.";
-                    break;
-                case 'insertion':
-                    explanation = "Insertion Sort builds the final sorted array one element at a time. It takes each element and inserts it into its correct position in the sorted part of the array.";
-                    break;
-                case 'selection':
-                    explanation = "Selection Sort works by repeatedly finding the minimum element from the unsorted part of the array and swapping it with the first unsorted element.";
-                    break;
-                case 'merge':
-                    explanation = "Merge Sort divides the array into two halves, recursively sorts them, and then merges the two sorted halves.";
-                    break;
-                case 'quick':
-                    explanation = "Quick Sort selects a pivot element and partitions the array into two halves such that elements less than the pivot are on the left and elements greater than the pivot are on the right. This process is repeated recursively.";
-                    break;
-                case 'heap':
-                    explanation = "Heap Sort builds a max-heap from the array and repeatedly extracts the maximum element from the heap and places it at the end of the array.";
-                    break;
-                case 'radix':
-                    explanation = "Radix Sort processes the digits of the numbers. It sorts the numbers digit by digit, starting from the least significant digit to the most significant digit.";
-                    break;
-            }
-
-            explanationDiv.textContent = explanation;
-            highlightCode(-1);
+    function highlightLine(lineNum) {
+        // Clear previous
+        document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+        if (lineNum > 0) {
+            const el = document.getElementById(\`line-\${lineNum}\`);
+            if (el) el.classList.add('active');
         }
+    }
 
-        function previousStep() {
-            if (currentStepIndex > 0) {
-                currentStepIndex--;
-                array = [...sortingSteps[currentStepIndex]];
-                visualizeArray();
-                updateExplanation(`Step ${currentStepIndex + 1}: ${explanationText}`);
-            }
+    function highlightBars(indices, className) {
+        const bars = document.getElementsByClassName('array-bar');
+        indices.forEach(idx => {
+            if(bars[idx]) bars[idx].classList.add(className);
+        });
+    }
+
+    function resetBars() {
+        const bars = document.getElementsByClassName('array-bar');
+        for (let bar of bars) {
+            bar.className = 'array-bar';
         }
+    }
 
-        function nextStep() {
-            if (currentStepIndex < sortingSteps.length - 1) {
-                currentStepIndex++;
-                array = [...sortingSteps[currentStepIndex]];
-                visualizeArray();
-                updateExplanation(`Step ${currentStepIndex + 1}: ${explanationText}`);
-            } else {
-                generateNextStep();
-            }
-        }
+    function swapBars(i, j) {
+        const bars = document.getElementsByClassName('array-bar');
+        const h1 = bars[i].style.height;
+        bars[i].style.height = bars[j].style.height;
+        bars[j].style.height = h1;
+    }
 
-        function generateNextStep() {
-            const algorithm = document.getElementById('algorithm-select').value;
-            switch (algorithm) {
-                case 'bubble':
-                    bubbleSortStep();
-                    break;
-                case 'insertion':
-                    insertionSortStep();
-                    break;
-                case 'selection':
-                    selectionSortStep();
-                    break;
-                case 'merge':
-                    mergeSortStep();
-                    break;
-                case 'quick':
-                    quickSortStep();
-                    break;
-                case 'heap':
-                    heapSortStep();
-                    break;
-                case 'radix':
-                    radixSortStep();
-                    break;
-            }
-        }
+    function updateHeight(i, val) {
+        const bars = document.getElementsByClassName('array-bar');
+        if(bars[i]) bars[i].style.height = \`\${val * 3}px\`;
+    }
 
-        function reset() {
+    function updateSpeed() {
+        const val = document.getElementById('speed').value;
+        speed = 1000 - val; // Invert: High value = fast = low ms
+    }
+
+    function togglePause() {
+        isPaused = !isPaused;
+        document.querySelector('button[onclick="togglePause()"]').innerText = isPaused ? "Resume ▶️" : "Pause ⏸️";
+    }
+
+    /* --- Sort Algorithms --- */
+
+    async function startSort() {
+        if (isSorting) return;
+        isSorting = true;
+        setMascot('idle');
+        const algo = document.getElementById('algo-select').value;
+        
+        try {
+            if (algo === 'bubble') await bubbleSort();
+            if (algo === 'insertion') await insertionSort();
+            if (algo === 'selection') await selectionSort();
+            if (algo === 'quick') await startQuickSort();
+            if (algo === 'merge') await startMergeSort();
+            
+            // Finish
+            highlightLine(0);
+            resetBars();
+            const bars = document.getElementsByClassName('array-bar');
+            for(let bar of bars) bar.classList.add('sorted');
+            setMascot('sorted');
+            explanation.innerText = "Sort Complete!";
+        } catch (e) {
+            console.log("Sort interrupted", e);
+        } finally {
             isSorting = false;
-            isPaused = false;
-            currentStepGenerator = null;
-            initializeArray();
         }
+    }
 
-        function updateSpeed() {
-            delay = 1000 - document.getElementById('speed').value;
-        }
+    // --- Bubble Sort ---
+    // 1: def bubble...
+    // 2:    n = len...
+    // 3:    for i...
+    // 4:        for j...
+    // 5:            if arr[j] > arr[j + 1]:
+    // 6:                arr[j], arr[j + 1]...
+    async function bubbleSort() {
+        const n = array.length;
+        highlightLine(1); await sleep(speed);
+        
+        for (let i = 0; i < n - 1; i++) {
+            highlightLine(3); 
+            await checkPaused();
 
-        function* bubbleSort() {
-            let n = array.length;
-            for (let i = 0; i < n - 1; i++) {
-                for (let j = 0; j < n - i - 1; j++) {
-                    if (array[j] > array[j + 1]) {
-                        explanationText = `Swapping ${array[j]} and ${array[j + 1]} since ${array[j]} > ${array[j + 1]}`;
-                        [array[j], array[j + 1]] = [array[j + 1], array[j]];
-                        sortingSteps.push([...array]);
-                        visualizeArray();
-                        updateExplanation(explanationText);
-                        highlightCode(3);
-                        yield;
-                    }
+            for (let j = 0; j < n - i - 1; j++) {
+                highlightLine(4);
+                resetBars();
+                highlightBars([j, j+1], 'compare');
+                setMascot('compare');
+                explanation.innerText = \`Comparing \${array[j]} and \${array[j+1]}\`;
+                await sleep(speed);
+                await checkPaused();
+
+                highlightLine(5);
+                if (array[j] > array[j + 1]) {
+                    explanation.innerText = \`\${array[j]} > \${array[j+1]}, swapping!\`;
+                    setMascot('swap');
+                    highlightBars([j, j+1], 'swap');
+                    
+                    highlightLine(6);
+                    // Swap data
+                    let temp = array[j];
+                    array[j] = array[j+1];
+                    array[j+1] = temp;
+                    // Swap Visuals
+                    swapBars(j, j+1);
+                    await sleep(speed);
                 }
             }
-            updateExplanation("Sorting complete!");
         }
+    }
 
-        function* insertionSort() {
-            let n = array.length;
-            for (let i = 1; i < n; i++) {
-                let key = array[i];
-                let j = i - 1;
-                while (j >= 0 && array[j] > key) {
-                    explanationText = `Shifting ${array[j]} to the right since ${array[j]} > ${key}`;
-                    array[j + 1] = array[j];
-                    j = j - 1;
-                    sortingSteps.push([...array]);
-                    visualizeArray();
-                    updateExplanation(explanationText);
-                    highlightCode(3);
-                    yield;
-                }
-                array[j + 1] = key;
-                explanationText = `Inserting ${key} in the correct position`;
-                sortingSteps.push([...array]);
-                visualizeArray();
-                updateExplanation(explanationText);
-                highlightCode(5);
-                yield;
+    // --- Insertion Sort ---
+    // 1: def insertion...
+    // 2:    for i in range(1...
+    // 3:        key = arr[i]
+    // 4:        j = i - 1
+    // 5:        while j >= 0...
+    // 6:            arr[j + 1] = arr[j]
+    // 7:            j -= 1
+    // 8:        arr[j + 1] = key
+    async function insertionSort() {
+        highlightLine(1); await sleep(speed);
+        for (let i = 1; i < array.length; i++) {
+            highlightLine(2); await checkPaused();
+            
+            let key = array[i];
+            let j = i - 1;
+            
+            highlightLine(3);
+            resetBars();
+            highlightBars([i], 'compare'); // Highlight key
+            explanation.innerText = \`Selected key: \${key}\`;
+            await sleep(speed);
+
+            highlightLine(5);
+            while (j >= 0 && array[j] > key) {
+                await checkPaused();
+                highlightBars([j], 'compare');
+                explanation.innerText = \`\${array[j]} > \${key}, shifting right.\`;
+                setMascot('swap');
+
+                highlightLine(6);
+                array[j + 1] = array[j];
+                updateHeight(j + 1, array[j]); // Visual shift
+                await sleep(speed);
+                
+                j = j - 1;
             }
-            updateExplanation("Sorting complete!");
+            highlightLine(8);
+            array[j + 1] = key;
+            updateHeight(j + 1, key); // Place key
+            await sleep(speed);
         }
+    }
 
-        function* selectionSort() {
-            let n = array.length;
-            for (let i = 0; i < n - 1; i++) {
-                let minIndex = i;
-                for (let j = i + 1; j < n; j++) {
-                    if (array[j] < array[minIndex]) {
-                        minIndex = j;
-                    }
-                }
-                if (minIndex !== i) {
-                    explanationText = `Swapping ${array[i]} with ${array[minIndex]} since ${array[minIndex]} is the smallest`;
-                    [array[i], array[minIndex]] = [array[minIndex], array[i]];
-                    sortingSteps.push([...array]);
-                    visualizeArray();
-                    updateExplanation(explanationText);
-                    highlightCode(5);
-                    yield;
-                }
-            }
-            updateExplanation("Sorting complete!");
-        }
+    // --- Selection Sort ---
+    // 1: def select...
+    // 2:    for i...
+    // 3:        min_idx = i
+    // 4:        for j...
+    // 5:            if arr[j] < arr[min_idx]:
+    // 6:                min_idx = j
+    // 7:        arr[i], arr...
+    async function selectionSort() {
+        highlightLine(1);
+        for (let i = 0; i < array.length; i++) {
+            highlightLine(2); 
+            let minIdx = i;
+            highlightLine(3);
+            resetBars();
+            highlightBars([i], 'sorted'); // Current position
 
-        function* mergeSort(start = 0, end = array.length - 1) {
-            if (start < end) {
-                let mid = Math.floor((start + end) / 2);
-                yield* mergeSort(start, mid);
-                yield* mergeSort(mid + 1, end);
-                yield* merge(start, mid, end);
-            }
-        }
-
-        function* merge(start, mid, end) {
-            let temp = [];
-            let i = start, j = mid + 1;
-            while (i <= mid && j <= end) {
-                if (array[i] <= array[j]) {
-                    temp.push(array[i++]);
+            for (let j = i + 1; j < array.length; j++) {
+                highlightLine(4); await checkPaused();
+                highlightBars([j], 'compare');
+                explanation.innerText = \`Looking for minimum...\`;
+                
+                highlightLine(5);
+                if (array[j] < array[minIdx]) {
+                    // Unmark old min
+                    if(minIdx !== i) highlightBars([minIdx], 'array-bar'); // hacky reset
+                    
+                    minIdx = j;
+                    highlightBars([minIdx], 'swap'); // Found new min
+                    highlightLine(6);
+                    setMascot('compare');
+                    explanation.innerText = \`Found new minimum: \${array[j]}\`;
+                    await sleep(speed);
                 } else {
-                    temp.push(array[j++]);
+                    // Reset non-min bar
+                    // const bars = document.getElementsByClassName('array-bar');
+                    // if(j !== minIdx) bars[j].className = 'array-bar';
                 }
+                await sleep(speed/2);
             }
-            while (i <= mid) {
-                temp.push(array[i++]);
-            }
-            while (j <= end) {
-                temp.push(array[j++]);
-            }
-            for (let k = 0; k < temp.length; k++) {
-                array[start + k] = temp[k];
-                sortingSteps.push([...array]);
-                visualizeArray();
-                updateExplanation(`Merging elements at position ${start + k}`);
-                highlightCode(5);
-                yield;
+            
+            if (minIdx !== i) {
+                highlightLine(7);
+                setMascot('swap');
+                explanation.innerText = \`Swapping \${array[i]} with min \${array[minIdx]}\`;
+                let temp = array[i];
+                array[i] = array[minIdx];
+                array[minIdx] = temp;
+                swapBars(i, minIdx);
+                await sleep(speed);
             }
         }
-
-        function* quickSort(start = 0, end = array.length - 1) {
-            if (start < end) {
-                let pivotIndex = yield* partition(start, end);
-                yield* quickSort(start, pivotIndex - 1);
-                yield* quickSort(pivotIndex + 1, end);
-            }
-        }
-
-        function* partition(start, end) {
-            let pivot = array[end];
-            let i = start - 1;
-            for (let j = start; j < end; j++) {
-                if (array[j] < pivot) {
-                    i++;
-                    explanationText = `Swapping ${array[i]} and ${array[j]} since ${array[j]} < ${pivot}`;
-                    [array[i], array[j]] = [array[j], array[i]];
-                    sortingSteps.push([...array]);
-                    visualizeArray();
-                    updateExplanation(explanationText);
-                    highlightCode(5);
-                    yield;
-                }
-            }
-            explanationText = `Placing pivot ${pivot} in the correct position`;
-            [array[i + 1], array[end]] = [array[end], array[i + 1]];
-            sortingSteps.push([...array]);
-            visualizeArray();
-            updateExplanation(explanationText);
-            highlightCode(7);
-            yield;
-            return i + 1;
-        }
-
-        function* heapSort() {
-            let n = array.length;
-            for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-                yield* heapify(n, i);
-            }
-            for (let i = n - 1; i > 0; i--) {
-                explanationText = `Swapping ${array[0]} and ${array[i]} to place the largest element at the end`;
-                [array[0], array[i]] = [array[i], array[0]];
-                sortingSteps.push([...array]);
-                visualizeArray();
-                updateExplanation(explanationText);
-                highlightCode(5);
-                yield;
-                yield* heapify(i, 0);
-            }
-            updateExplanation("Sorting complete!");
-        }
-
-        function* heapify(n, i) {
-            let largest = i;
-            let left = 2 * i + 1;
-            let right = 2 * i + 2;
-            if (left < n && array[left] > array[largest]) {
-                largest = left;
-            }
-            if (right < n && array[right] > array[largest]) {
-                largest = right;
-            }
-            if (largest !== i) {
-                explanationText = `Swapping ${array[i]} and ${array[largest]} to maintain the heap property`;
-                [array[i], array[largest]] = [array[largest], array[i]];
-                sortingSteps.push([...array]);
-                visualizeArray();
-                updateExplanation(explanationText);
-                highlightCode(5);
-                yield;
-                yield* heapify(n, largest);
-            }
-        }
-
-        function* radixSort() {
-            let max = Math.max(...array);
-            for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
-                yield* countingSort(exp);
-            }
-            updateExplanation("Sorting complete!");
-        }
-
-        function* countingSort(exp) {
-            let n = array.length;
-            let output = new Array(n);
-            let count = new Array(10).fill(0);
-
-            for (let i = 0; i < n; i++) {
-                let digit = Math.floor(array[i] / exp) % 10;
-                count[digit]++;
-            }
-
-            for (let i = 1; i < 10; i++) {
-                count[i] += count[i - 1];
-            }
-
-            for (let i = n - 1; i >= 0; i--) {
-                let digit = Math.floor(array[i] / exp) % 10;
-                output[count[digit] - 1] = array[i];
-                count[digit]--;
-            }
-
-            for (let i = 0; i < n; i++) {
-                array[i] = output[i];
-                sortingSteps.push([...array]);
-                visualizeArray();
-                updateExplanation(`Placing ${array[i]} in the correct bucket`);
-                highlightCode(5);
-                yield;
-            }
-        }
-
-        async function startSorting() {
-            if (isSorting) return;
-            isSorting = true;
-
-            const algorithm = document.getElementById('algorithm-select').value;
-            switch (algorithm) {
-                case 'bubble':
-                    currentStepGenerator = bubbleSort();
-                    break;
-                case 'insertion':
-                    currentStepGenerator = insertionSort();
-                    break;
-                case 'selection':
-                    currentStepGenerator = selectionSort();
-                    break;
-                case 'merge':
-                    currentStepGenerator = mergeSort();
-                    break;
-                case 'quick':
-                    currentStepGenerator = quickSort();
-                    break;
-                case 'heap':
-                    currentStepGenerator = heapSort();
-                    break;
-                case 'radix':
-                    currentStepGenerator = radixSort();
-                    break;
-            }
-
-            while (!isPaused && !currentStepGenerator.next().done) {
-                await new Promise(resolve => setTimeout(resolve, delay));
-                if (isPaused) break;
-            }
-            isSorting = false;
-        }
-
-        function pauseResume() {
-            isPaused = !isPaused;
-            if (!isPaused && currentStepGenerator) {
-                startSorting();
-            }
-        }
-
-        function highlightCode(lineNumber) {
-            const codePanel = document.getElementById('code-panel');
-            const algorithm = document.getElementById('algorithm-select').value;
-            let code = '';
-            codePanel.innerHTML = code.split('\n').map((line, index) =>
-        `<div class="${index === lineNumber ? 'active-line' : ''}" id="code-line-${index}">${line}</div>`
-    ).join('');
-
-    if (lineNumber >= 0) {
-        const lineElement = document.getElementById(`code-line-${lineNumber}`);
-        if (lineElement) {
-            lineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }         
-            switch (algorithm) {
-                case 'bubble':
-                    code = `function bubbleSort(arr) {
-  let n = arr.length;
-  for (let i = 0; i < n-1; i++) {
-    for (let j = 0; j < n-i-1; j++) {
-      if (arr[j] > arr[j+1]) {
-        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
-      }
     }
-  }
-}`;
-                    break;
-                case 'insertion':
-                    code = `function insertionSort(arr) {
-  let n = arr.length;
-  for (let i = 1; i < n; i++) {
-    let key = arr[i];
-    let j = i - 1;
-    while (j >= 0 && arr[j] > key) {
-      arr[j + 1] = arr[j];
-      j = j - 1;
+
+    // --- Quick Sort Helpers ---
+    async function startQuickSort() {
+        await quickSort(0, array.length - 1);
     }
-    arr[j + 1] = key;
-  }
-}`;
-                    break;
-                case 'selection':
-                    code = `function selectionSort(arr) {
-  let n = arr.length;
-  for (let i = 0; i < n-1; i++) {
-    let minIndex = i;
-    for (let j = i+1; j < n; j++) {
-      if (arr[j] < arr[minIndex]) {
-        minIndex = j;
-      }
+
+    // 1: def quick...
+    // 2:    if low < high:
+    // 3:        # Partition
+    // 4:        pivot = arr[high]
+    // 5:        i = low - 1
+    // 6:        for j in range...
+    // 7:            if arr[j] <= pivot:
+    // 8:                i += 1
+    // 9:                arr[i], arr[j]...
+    // 10:       arr[i+1], arr[high]...
+    async function quickSort(low, high) {
+         if (low < high) {
+            highlightLine(2);
+            let pi = await partition(low, high);
+            await quickSort(low, pi - 1);
+            await quickSort(pi + 1, high);
+         }
     }
-    if (minIndex !== i) {
-      [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
-    }
-  }
-}`;
-                    break;
-                case 'merge':
-                    code = `function mergeSort(arr, start = 0, end = arr.length - 1) {
-  if (start < end) {
-    let mid = Math.floor((start + end) / 2);
-    mergeSort(arr, start, mid);
-    mergeSort(arr, mid + 1, end);
-    merge(arr, start, mid, end);
-  }
-}
 
-function merge(arr, start, mid, end) {
-  let temp = [];
-  let i = start, j = mid + 1;
-  while (i <= mid && j <= end) {
-    if (arr[i] <= arr[j]) {
-      temp.push(arr[i++]);
-    } else {
-      temp.push(arr[j++]);
-    }
-  }
-  while (i <= mid) {
-    temp.push(arr[i++]);
-  }
-  while (j <= end) {
-    temp.push(arr[j++]);
-  }
-  for (let k = 0; k < temp.length; k++) {
-    arr[start + k] = temp[k];
-  }
-}`;
-                    break;
-                case 'quick':
-                    code = `function quickSort(arr, start = 0, end = arr.length - 1) {
-  if (start < end) {
-    let pivotIndex = partition(arr, start, end);
-    quickSort(arr, start, pivotIndex - 1);
-    quickSort(arr, pivotIndex + 1, end);
-  }
-}
-
-function partition(arr, start, end) {
-  let pivot = arr[end];
-  let i = start - 1;
-  for (let j = start; j < end; j++) {
-    if (arr[j] < pivot) {
-      i++;
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-  }
-  [arr[i + 1], arr[end]] = [arr[end], arr[i + 1]];
-  return i + 1;
-}`;
-                    break;
-                case 'heap':
-                    code = `function heapSort(arr) {
-  let n = arr.length;
-  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-    heapify(arr, n, i);
-  }
-  for (let i = n - 1; i > 0; i--) {
-    [arr[0], arr[i]] = [arr[i], arr[0]];
-    heapify(arr, i, 0);
-  }
-}
-
-function heapify(arr, n, i) {
-  let largest = i;
-  let left = 2 * i + 1;
-  let right = 2 * i + 2;
-  if (left < n && arr[left] > arr[largest]) {
-    largest = left;
-  }
-  if (right < n && arr[right] > arr[largest]) {
-    largest = right;
-  }
-  if (largest !== i) {
-    [arr[i], arr[largest]] = [arr[largest], arr[i]];
-    heapify(arr, n, largest);
-  }
-}`;
-                    break;
-                case 'radix':
-                    code = `function radixSort(arr) {
-  let max = Math.max(...arr);
-  for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
-    countingSort(arr, exp);
-  }
-}
-
-function countingSort(arr, exp) {
-  let n = arr.length;
-  let output = new Array(n);
-  let count = new Array(10).fill(0);
-
-  for (let i = 0; i < n; i++) {
-    let digit = Math.floor(arr[i] / exp) % 10;
-    count[digit]++;
-  }
-
-  for (let i = 1; i < 10; i++) {
-    count[i] += count[i - 1];
-  }
-
-  for (let i = n - 1; i >= 0; i--) {
-    let digit = Math.floor(arr[i] / exp) % 10;
-    output[count[digit] - 1] = arr[i];
-    count[digit]--;
-  }
-
-  for (let i = 0; i < n; i++) {
-    arr[i] = output[i];
-  }
-}`;
-                    break;
+    async function partition(low, high) {
+        highlightLine(4);
+        let pivot = array[high];
+        highlightBars([high], 'swap'); // Pivot is red
+        explanation.innerText = \`Pivot is \${pivot}\`;
+        
+        let i = low - 1;
+        highlightLine(5);
+        
+        for (let j = low; j < high; j++) {
+            highlightLine(6); await checkPaused();
+            resetBars();
+            highlightBars([high], 'swap'); // Keep pivot highlighted
+            highlightBars([j], 'compare');
+            
+            highlightLine(7);
+            if (array[j] <= pivot) {
+                i++;
+                highlightLine(8);
+                highlightLine(9);
+                setMascot('swap');
+                
+                [array[i], array[j]] = [array[j], array[i]];
+                swapBars(i, j);
+                await sleep(speed);
             }
+        }
+        highlightLine(10);
+        [array[i + 1], array[high]] = [array[high], array[i + 1]];
+        swapBars(i + 1, high);
+        await sleep(speed);
+        
+        return i + 1;
+    }
 
-            codePanel.innerHTML = code.split('\n').map((line, index) =>
-                `<div class="${index === lineNumber ? 'active-line' : ''}">${line}</div>`
-            ).join('');
+    // --- Merge Sort Helpers ---
+    // Note: Merge sort in place visualization is tricky with the Python slice syntax shown.
+    // I will simulate the recursive merges visually on the main array.
+    async function startMergeSort() {
+        await mergeSortHelper(0, array.length - 1);
+    }
+
+    async function mergeSortHelper(left, right) {
+        if (left >= right) return;
+        const mid = Math.floor((left + right) / 2);
+        await mergeSortHelper(left, mid);
+        await mergeSortHelper(mid + 1, right);
+        await merge(left, mid, right);
+    }
+
+    async function merge(left, mid, right) {
+        // Visualizing the Python 'merge' logic conceptually
+        let n1 = mid - left + 1;
+        let n2 = right - mid;
+        let L = new Array(n1);
+        let R = new Array(n2);
+
+        for (let i = 0; i < n1; i++) L[i] = array[left + i];
+        for (let j = 0; j < n2; j++) R[j] = array[mid + 1 + j];
+
+        let i = 0, j = 0, k = left;
+        
+        // Highlight Lines roughly corresponding to the merge loop
+        // 5: while i < len(left)...
+        // 6:     if left[i] < right[j]...
+        
+        while (i < n1 && j < n2) {
+            await checkPaused();
+            highlightLine(5);
+            resetBars();
+            highlightBars([left + i, mid + 1 + j], 'compare');
+            await sleep(speed);
+
+            highlightLine(6);
+            if (L[i] <= R[j]) {
+                highlightLine(7); // result.append(left[i])
+                array[k] = L[i];
+                i++;
+            } else {
+                highlightLine(9); // else
+                highlightLine(10); // result.append(right[j])
+                array[k] = R[j];
+                j++;
+            }
+            updateHeight(k, array[k]);
+            highlightBars([k], 'sorted');
+            k++;
+            await sleep(speed);
         }
 
-        initializeArray();
-    </script>
+        while (i < n1) {
+            array[k] = L[i];
+            updateHeight(k, array[k]);
+            i++; k++;
+            await sleep(speed/2);
+        }
+        while (j < n2) {
+            array[k] = R[j];
+            updateHeight(k, array[k]);
+            j++; k++;
+            await sleep(speed/2);
+        }
+    }
+
+    // Start
+    init();
+
+  </script>
 </body>
 </html>
