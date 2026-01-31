@@ -14,8 +14,11 @@
     href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Fredoka:wght@400;600&family=Press+Start+2P&display=swap"
     rel="stylesheet">
 
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   <style>
-    /* --- RESTORED CYBERPUNK THEME --- */
+    /* --- SHARED & THEME --- */
     :root {
       --bg-color: #0d1117;
       --panel-bg: rgba(22, 27, 34, 0.8);
@@ -31,17 +34,210 @@
     }
 
     body {
-      font-family: 'Fredoka', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: var(--bg-color);
+      background-color: #000;
+      /* Fallback for 3D */
       color: var(--text-main);
-      background-image: radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.1) 0%, transparent 20%),
-        radial-gradient(circle at 90% 80%, rgba(210, 168, 255, 0.1) 0%, transparent 20%);
       min-height: 100vh;
+      font-family: 'Fredoka', sans-serif;
+      overflow-x: hidden;
+      /* Prevent horizontal scroll */
+    }
+
+    /* --- WELCOME OVERLAY (3D SCENE) --- */
+    #welcome-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Press Start 2P', cursive;
+    }
+
+    #welcome-canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    #welcome-ui {
+      z-index: 10;
+      text-align: center;
+      pointer-events: none;
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 30px;
+    }
+
+    .welcome-title {
+      font-size: 3.5rem;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      color: #fff;
+      text-shadow:
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #58a6ff,
+        0 0 30px #58a6ff,
+        0 0 40px #58a6ff;
+      opacity: 0;
+      transform: scale(0.9);
+      animation: glitchFadeIn 1s cubic-bezier(0.19, 1, 0.22, 1) forwards 0.5s;
+    }
+
+    @keyframes glitchFadeIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.9) skew(10deg);
+      }
+
+      20% {
+        opacity: 1;
+        transform: scale(1.1) skew(-10deg);
+      }
+
+      40% {
+        transform: scale(0.95) skew(5deg);
+      }
+
+      60% {
+        transform: scale(1.02) skew(0deg);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .enter-btn {
+      pointer-events: auto;
+      padding: 25px 50px;
+      font-size: 1.2rem;
+      font-family: 'Press Start 2P', cursive;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid #58a6ff;
+      color: #58a6ff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeInUp 1s ease forwards 1.5s, pulse-glow 2s infinite 2s;
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+      transition: 0.3s;
+    }
+
+    .enter-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.4), transparent);
+      transition: 0.4s;
+    }
+
+    .enter-btn:hover {
+      background: #58a6ff;
+      color: #000;
+      box-shadow: 0 0 30px #58a6ff, 0 0 60px #58a6ff;
+      transform: translateY(-5px);
+    }
+
+    .enter-btn:hover::before {
+      left: 100%;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse-glow {
+      0% {
+        box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 25px rgba(88, 166, 255, 0.6), inset 0 0 10px rgba(88, 166, 255, 0.4);
+      }
+
+      100% {
+        box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+      }
+    }
+
+    .status-text {
+      font-family: 'Fira Code', monospace;
+      color: #d2a8ff;
+      font-size: 0.9rem;
+      opacity: 0;
+      animation: typeIn 1s steps(20, end) forwards 1s;
+      border-right: 2px solid #d2a8ff;
+      white-space: nowrap;
+      overflow: hidden;
+      margin-bottom: -20px;
+    }
+
+    @keyframes typeIn {
+      from {
+        width: 0;
+        opacity: 1;
+      }
+
+      to {
+        width: 100%;
+        opacity: 1;
+        border-color: transparent;
+      }
+    }
+
+    /* --- APP INTERFACE (HIDDEN INITIALLY) --- */
+    #app-interface {
+      display: none;
+      /* Shows after enter */
+      opacity: 0;
+      transition: opacity 2s ease;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      /* Dynamic BG for App Mode */
+      background: linear-gradient(-45deg, #0d1117, #161b22, #0f1620, #1c1c2e);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
     }
 
     /* --- Header & Logo --- */
@@ -68,7 +264,7 @@
       transform: scale(1.05);
     }
 
-    h1 {
+    h1.app-title {
       font-family: 'Press Start 2P', cursive;
       color: var(--accent-color);
       text-shadow: 4px 4px 0px #053a11;
@@ -86,7 +282,6 @@
       max-width: 1400px;
       justify-content: center;
       padding-bottom: 100px;
-      /* Space for mascot */
     }
 
     .glass-panel {
@@ -99,7 +294,6 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      /* For overlay */
     }
 
     #visualizer-panel {
@@ -151,11 +345,10 @@
     .control-btn:hover {
       background: var(--accent-color);
       color: var(--bg-color);
-      transform: translateY(-2px);
-      box-shadow: var(--neon-glow);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 0 15px var(--accent-color);
     }
 
-    /* Start Button Pulse Animation */
     #play-btn {
       background: rgba(88, 166, 255, 0.1);
       animation: pulse-border 2s infinite;
@@ -187,7 +380,6 @@
       outline: none;
     }
 
-    /* Speed Slider */
     .speed-container {
       display: flex;
       flex-direction: column;
@@ -227,9 +419,20 @@
       background-color: var(--bar-default);
       border-radius: 4px 4px 0 0;
       box-shadow: 0 0 5px var(--bar-default);
-
-      /* CRITICAL FOR SMOOTH ANIMATION */
       transition: height 0.1s linear, background-color 0.1s;
+      /* Text Display */
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 2px;
+      color: #fff;
+      text-shadow: 0 1px 2px #000;
+      font-size: 14px;
+      /* Larger font */
+      font-weight: bold;
+      font-family: 'Fira Code', monospace;
+      overflow: hidden;
+      white-space: nowrap;
     }
 
     .array-bar.compare {
@@ -250,29 +453,63 @@
     /* --- Code Panel --- */
     #code-display {
       font-family: 'Fira Code', monospace;
-      font-size: 13px;
+      font-size: 14px;
       line-height: 1.6;
-      background: #000;
+      background: #0d1117;
       padding: 15px;
       border-radius: 8px;
       overflow-y: auto;
       flex-grow: 1;
       white-space: pre;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .code-line {
       display: block;
-      padding: 0 5px;
+      padding: 4px 8px;
       border-left: 3px solid transparent;
+      border-radius: 0 4px 4px 0;
+      transition: all 0.1s ease-out;
+      /* Faster transition */
+      opacity: 0.7;
+      margin-bottom: 2px;
     }
 
     .code-line.active {
-      background-color: rgba(210, 168, 255, 0.2);
-      border-left-color: var(--highlight-color);
-      color: #fff;
-      text-shadow: 0 0 2px var(--highlight-color);
+      background: rgba(88, 166, 255, 0.2) !important;
+      border-left: 4px solid #58a6ff !important;
+      color: #fff !important;
       font-weight: bold;
+      padding-left: 12px;
+      opacity: 1 !important;
     }
+
+    /* Syntax Highlighting */
+    .kwd {
+      color: #ff7b72;
+    }
+
+    /* Keywords: def, for, if... */
+    .func {
+      color: #d2a8ff;
+    }
+
+    /* Functions */
+    .num {
+      color: #79c0ff;
+    }
+
+    /* Numbers */
+    .var {
+      color: #c9d1d9;
+    }
+
+    /* Variables */
+    .op {
+      color: #ff7b72;
+    }
+
+    /* Operators */
 
     #explanation {
       margin-top: 20px;
@@ -334,7 +571,6 @@
       }
     }
 
-    /* Guide Overlay */
     .guide-tooltip {
       position: absolute;
       top: 80px;
@@ -368,109 +604,399 @@
 
 <body>
 
-  <div class="header-container">
-    <img src="ravenclaw.png" alt="Logo" class="logo-img"
-      onerror="this.src='https://upload.wikimedia.org/wikipedia/en/thumb/3/33/Ravenclaw_Crest.png/220px-Ravenclaw_Crest.png'">
-    <h1>Sort Visualizer</h1>
+  <!-- WELCOME OVERLAY -->
+  <div id="welcome-overlay">
+    <div id="welcome-canvas-container"></div>
+    <div id="welcome-ui">
+      <h1 class="welcome-title">Sort<br>Visualizer</h1>
+      <div class="status-text">> SYSTEM READY_</div>
+      <button class="enter-btn" onclick="enterApp()">Initialize System</button>
+    </div>
   </div>
 
-  <div class="main-container">
-    <div id="visualizer-panel" class="glass-panel">
+  <!-- MAIN APP INTERFACE (HIDDEN INITIALLY) -->
+  <div id="app-interface"> <!-- Was plain style="display:none" now managed by JS class/id styles -->
+    <div class="header-container">
+      <img src="ravenclaw.png" alt="Logo" class="logo-img"
+        onerror="this.src='https://upload.wikimedia.org/wikipedia/en/thumb/3/33/Ravenclaw_Crest.png/220px-Ravenclaw_Crest.png'">
+      <h1 class="app-title">Sort Visualizer</h1>
+    </div>
 
-      <div class="controls-row">
-        <span class="control-label">1. Sort:</span>
-        <select id="algo-select" onchange="resetController()">
-          <option value="bubble">Bubble Sort</option>
-          <option value="insertion">Insertion Sort</option>
-          <option value="selection">Selection Sort</option>
-          <option value="merge">Merge Sort</option>
-          <option value="quick">Quick Sort</option>
-          <option value="heap">Heap Sort</option>
-          <option value="radix">Radix Sort</option>
-        </select>
+    <div class="main-container">
+      <div id="visualizer-panel" class="glass-panel">
+        <div class="controls-row">
+          <span class="control-label">SELECT THE ALGORITHM :</span>
+          <select id="algo-select" onchange="resetController()">
+            <option value="bubble">BUBBLE SORT</option>
+            <option value="insertion">INSERTION SORT</option>
+            <option value="selection">SELECTION SORT</option>
+            <option value="merge">MERGE SORT</option>
+            <option value="quick">QUICK SORT</option>
+            <option value="heap">HEAP SORT</option>
+            <option value="radix">RADIX SORT</option>
+          </select>
 
-        <button class="control-btn" id="play-btn" onclick="togglePlay()">Start ✨</button>
-        <button class="control-btn" onclick="resetController()">Reset 🔄</button>
+          <button class="control-btn" id="play-btn" onclick="togglePlay()">Start ✨</button>
+          <button class="control-btn" onclick="resetController()">Reset 🔄</button>
 
-        <span class="control-label" style="margin-left:10px;">Playback:</span>
-        <button class="control-btn" onclick="prevStep()">Example ⏮️</button>
-        <button class="control-btn" onclick="nextStep()">Next ⏭️</button>
+          <span class="control-label" style="margin-left:10px;">Playback:</span>
+          <button class="control-btn" onclick="prevStep()">Previous ⏮️</button>
+          <button class="control-btn" onclick="nextStep()">Next ⏭️</button>
 
-        <div class="speed-container">
-          <div class="speed-label" id="speed-label">Speed: 1.0x</div>
-          <input type="range" id="speed" min="1" max="50" value="10" oninput="updateSpeed()">
+          <div class="speed-container">
+            <div class="speed-label" id="speed-label">Speed: 1.0x</div>
+            <input type="range" id="speed" min="1" max="50" value="10" oninput="updateSpeed()">
+          </div>
         </div>
+
+        <div class="guide-tooltip">Select a Sort Algorithm & Click Start! 👆</div>
+        <div id="array-container"></div>
+        <div id="explanation">Ready to sort!</div>
       </div>
 
-      <!-- Guide Overlay -->
-      <div class="guide-tooltip">Select a Sort Algorithm & Click Start! 👆</div>
-
-      <div id="array-container"></div>
-      <div id="explanation">Ready to sort!</div>
-
+      <div id="code-panel-container" class="glass-panel">
+        <h3
+          style="margin-top:0; color: var(--accent-color); font-family: 'Press Start 2P'; font-size: 14px; text-align:center;">
+          PYTHON TRACE
+        </h3>
+        <div id="code-display"></div>
+      </div>
     </div>
 
-    <div id="code-panel-container" class="glass-panel">
-      <h3
-        style="margin-top:0; color: var(--accent-color); font-family: 'Press Start 2P'; font-size: 14px; text-align:center;">
-        PYTHON TRACE</h3>
-      <div id="code-display"></div>
+    <div id="mascot-container">
+      <div id="mascot-bubble">Hello! I'm Merlin. Let's sort! 🧙‍♂️</div>
+      <div id="mascot-char">🧙‍♂️</div>
     </div>
-  </div>
-
-  <div id="mascot-container">
-    <div id="mascot-bubble">Hello! I'm Merlin. Let's sort! 🧙‍♂️</div>
-    <div id="mascot-char">🧙‍♂️</div>
   </div>
 
   <script>
+    /* =========================================
+       PART 1: 3D WELCOME SCENE (THREE.JS)
+       ========================================= */
+    let scene, camera, renderer, particles, columns = [];
+    let mouseX = 0, mouseY = 0;
+    let welcomeActive = true;
+    let transitionPhase = 0; // 0: Idle, 1: Warp
+    let warpSpeed = 0;
+
+    // Configuration for 3D Scene
+    const CONFIG = {
+      count: 200,
+      range: 1000,
+      baseSpeed: 0.02,
+      warpMaxSpeed: 50,
+      colors: [0x58a6ff, 0xd2a8ff, 0x238636, 0xf85149, 0xbc8cff, 0x7ee787]
+    };
+
+    function initWelcome() {
+      const container = document.getElementById('welcome-canvas-container');
+
+      // Scene
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x050510, 0.002);
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 3000);
+      camera.position.z = 800;
+      camera.position.y = 100;
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      container.appendChild(renderer.domElement);
+
+      // --- Geometry: Neon Pillars ---
+      // We use EdgesGeometry to get that "Wireframe" look
+      const boxGeo = new THREE.BoxGeometry(20, 1, 20);
+      const edgesGeo = new THREE.EdgesGeometry(boxGeo);
+
+      for (let i = 0; i < CONFIG.count; i++) {
+        const material = new THREE.LineBasicMaterial({
+          color: CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)],
+          transparent: true,
+          opacity: 0.6
+        });
+
+        const mesh = new THREE.LineSegments(edgesGeo, material);
+
+        // Random Position
+        mesh.position.x = (Math.random() - 0.5) * CONFIG.range * 2;
+        mesh.position.y = (Math.random() - 0.5) * CONFIG.range;
+        mesh.position.z = (Math.random() - 0.5) * CONFIG.range * 2;
+
+        // Random Height scale
+        mesh.scale.y = Math.random() * 200 + 20;
+
+        mesh.userData = {
+          speed: Math.random() * 0.1 + 0.05,
+          yBase: mesh.position.y,
+          phase: Math.random() * Math.PI * 2
+        };
+
+        scene.add(mesh);
+        columns.push(mesh);
+      }
+
+      // --- Particles ---
+      const particlesGeo = new THREE.BufferGeometry();
+      const posArray = new Float32Array(3000 * 3);
+      for (let i = 0; i < 3000 * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 3000;
+      }
+      particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      const particlesMat = new THREE.PointsMaterial({
+        size: 3,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+      particles = new THREE.Points(particlesGeo, particlesMat);
+      scene.add(particles);
+
+      // Events
+      window.addEventListener('resize', onWindowResize);
+      document.addEventListener('mousemove', onDocumentMouseMove);
+
+      animateWelcome();
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function onDocumentMouseMove(event) {
+      if (!welcomeActive || transitionPhase > 0) return;
+      mouseX = (event.clientX - window.innerWidth / 2) * 0.5;
+      mouseY = (event.clientY - window.innerHeight / 2) * 0.5;
+    }
+
+    function animateWelcome() {
+      if (!welcomeActive && !renderer) return;
+
+      requestAnimationFrame(animateWelcome);
+
+      const time = Date.now() * 0.001;
+
+      // --- Phase 0: Idle / Interact ---
+      if (transitionPhase === 0) {
+        // Smooth look-at
+        camera.position.x += (mouseX - camera.position.x) * 0.05;
+        camera.position.y += (-mouseY - camera.position.y) * 0.05;
+        camera.lookAt(scene.position);
+
+        // Gentle rotation
+        scene.rotation.y += 0.001;
+      }
+
+      // --- Phase 1: Warp Speed ---
+      else if (transitionPhase === 1) {
+        warpSpeed += 1.5; // Accelerate
+        if (warpSpeed > CONFIG.warpMaxSpeed) warpSpeed = CONFIG.warpMaxSpeed;
+
+        camera.position.z -= warpSpeed;
+
+        // Warp Shake
+        camera.position.x = (Math.random() - 0.5) * 5;
+        camera.position.y = (Math.random() - 0.5) * 5;
+
+        // Simple completion check
+        if (camera.position.z < -500) {
+          finishTransition();
+          return;
+        }
+      }
+
+      // --- Object Animation ---
+      columns.forEach((mesh) => {
+        // Pulse height
+        mesh.scale.y += Math.sin(time * 2 + mesh.userData.phase) * 0.5;
+        if (mesh.scale.y < 10) mesh.scale.y = 10;
+
+        // Spin
+        mesh.rotation.y += 0.02;
+      });
+
+      // Particles rotation
+      if (particles) {
+        particles.rotation.z += 0.002;
+        // Stretch particles effect during warp could go here by modding geometry, 
+        // but simple speed is enough for now.
+      }
+
+      if (renderer) renderer.render(scene, camera);
+    }
+
+    // --- TRANSITION FUNCTION ---
+    window.enterApp = function () {
+      const btn = document.querySelector('.enter-btn');
+      if (!btn || transitionPhase > 0) return; // Prevent double click
+
+      btn.innerHTML = "INITIALIZING CORE...";
+      btn.style.borderColor = "#fff";
+      btn.style.background = "#fff";
+      btn.style.color = "#000";
+      btn.style.boxShadow = "0 0 50px white";
+
+      // Trigger Warp
+      transitionPhase = 1;
+      playWarpSound();
+    };
+
+    function playWarpSound() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const t = ctx.currentTime;
+
+        // Function to play a soft chime note
+        const playNote = (freq, delay) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'sine'; // Softest wave
+          osc.frequency.setValueAtTime(freq, t + delay);
+
+          // Envelope: Gentle attack, smooth decay
+          gain.gain.setValueAtTime(0, t + delay);
+          gain.gain.linearRampToValueAtTime(0.2, t + delay + 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 1.5);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t + delay);
+          osc.stop(t + delay + 1.5);
+        };
+
+        // Play a major 7th chord arpeggio (C, E, G, B) + High C
+        // Playful and magical sequence
+        playNote(523.25, 0.0); // C5
+        playNote(659.25, 0.1); // E5
+        playNote(783.99, 0.2); // G5
+        playNote(987.77, 0.3); // B5
+        playNote(1046.5, 0.4); // C6
+
+        // Swoosh breeze underneath
+        const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 1, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < ctx.sampleRate; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const noiseGain = ctx.createGain();
+        const noiseFilter = ctx.createBiquadFilter();
+
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.setValueAtTime(200, t);
+        noiseFilter.frequency.linearRampToValueAtTime(800, t + 0.5);
+
+        noiseGain.gain.setValueAtTime(0.05, t);
+        noiseGain.gain.linearRampToValueAtTime(0, t + 0.8);
+
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+        noise.start(t);
+
+      } catch (e) {
+        console.log("Audio play failed", e);
+      }
+    }
+
+    function finishTransition() {
+      if (!welcomeActive) return; // Already finished
+
+      const overlay = document.getElementById('welcome-overlay');
+      const app = document.getElementById('app-interface');
+
+      // Hide Welcome
+      overlay.style.transition = "opacity 0.5s ease-out";
+      overlay.style.opacity = 0;
+
+      // Wait for fade out
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        welcomeActive = false;
+
+        // Cleanup Three.js
+        const container = document.getElementById('welcome-canvas-container');
+        if (container) container.innerHTML = '';
+        renderer = null;
+        scene = null;
+
+        // Show App
+        app.style.display = 'flex';
+        void app.offsetWidth; // Force Reflow
+        app.style.opacity = 1;
+
+        // Init Sort App
+        // Use a slight timeout to ensure layout is settled
+        setTimeout(() => {
+          resetController();
+          appInitialized = true;
+        }, 100);
+      }, 500);
+    }
+
+
+    /* =========================================
+       PART 2: SORTING VISUALIZER LOGIC
+       ========================================= */
+
     /* --- State --- */
-    const ARRAY_SIZE = 20; // Lower count for bigger bars
+    const ARRAY_SIZE = 20;
     let initialArray = [];
     let frames = [];
     let currentFrameIndex = 0;
     let isPlaying = false;
     let playInterval = null;
-    let frameRate = 100; // ms
+    let frameRate = 100;
 
-    const container = document.getElementById('array-container');
-    const codeDisplay = document.getElementById('code-display');
-    const explanation = document.getElementById('explanation');
-    const mascotBubble = document.getElementById('mascot-bubble');
-    const mascotChar = document.getElementById('mascot-char');
-    const playBtn = document.getElementById('play-btn');
+    // Dom Elements (will be available when app is shown)
+    // Note: They technically exist in DOM even when hidden
+    const containerEl = document.getElementById('array-container');
+    const codeDisplayEl = document.getElementById('code-display');
+    const explanationEl = document.getElementById('explanation');
+    const mascotBubbleEl = document.getElementById('mascot-bubble');
+    const mascotCharEl = document.getElementById('mascot-char');
+    const playBtnEl = document.getElementById('play-btn');
 
     /* --- Python Snippets --- */
     const codeSnippets = {
       bubble:
-    \`def bubble_sort(arr):
+        `def bubble_sort(arr):
     n = len(arr)
     for i in range(n - 1):
         for j in range(n - i - 1):
             if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]\`,
-      
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]`,
+
       insertion:
-\`def insertion_sort(arr):
+        `def insertion_sort(arr):
     for i in range(1, len(arr)):
         key = arr[i]
         j = i - 1
         while j >= 0 and arr[j] > key:
             arr[j + 1] = arr[j]
             j -= 1
-        arr[j + 1] = key\`,
+        arr[j + 1] = key`,
 
       selection:
-\`def selection_sort(arr):
+        `def selection_sort(arr):
     for i in range(len(arr)):
         min_idx = i
         for j in range(i + 1, len(arr)):
             if arr[j] < arr[min_idx]:
                 min_idx = j
-        arr[i], arr[min_idx] = arr[min_idx], arr[i]\`,
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]`,
 
       merge:
-\`def merge_sort(left, right):
+        `def merge_sort(arr):
     if len(arr) > 1:
         mid = len(arr) // 2
         L = arr[:mid]; R = arr[mid:]
@@ -482,10 +1008,10 @@
             else: arr[k] = R[j]; j += 1
             k += 1
         while i < len(L): ...
-        while j < len(R): ...\`,
+        while j < len(R): ...`,
 
       quick:
-\`def quick_sort(arr, low, high):
+        `def quick_sort(arr, low, high):
     if low < high:
         pi = partition(arr, low, high)
         quick_sort(arr, low, pi - 1)
@@ -499,10 +1025,10 @@ def partition(arr, low, high):
             i += 1
             arr[i], arr[j] = arr[j], arr[i]
     arr[i+1], arr[high] = arr[high], arr[i+1]
-    return i + 1\`,
+    return i + 1`,
 
-     heap:
-\`def heap_sort(arr):
+      heap:
+        `def heap_sort(arr):
     n = len(arr)
     for i in range(n // 2 - 1, -1, -1):
         heapify(arr, n, i)
@@ -517,369 +1043,406 @@ def heapify(arr, n, i):
     if r < n and arr[r] > arr[largest]: largest = r
     if largest != i:
         arr[i], arr[largest] = arr[largest], arr[i]
-        heapify(arr, n, largest)\`,
+        heapify(arr, n, largest)`,
 
-     radix:
-\`def radix_sort(arr):
+      radix:
+        `def radix_sort(arr):
     max_val = max(arr)
     exp = 1
     while max_val // exp > 0:
         counting_sort(arr, exp)
-        exp *= 10\`
+        exp *= 10`
     };
 
     /* --- Logic --- */
-    window.onload = resetController;
+    // window.onload handled by initWelcome now
+    window.onload = initWelcome;
 
     function resetController() {
-        pause();
-        initialArray = [];
-        container.innerHTML = '';
-        
-        // Generate and CREATE DOM bars once
-        for(let i=0; i<ARRAY_SIZE; i++) {
-            const val = Math.floor(Math.random() * 80) + 10;
-            initialArray.push(val);
-            
-            const bar = document.createElement('div');
-            bar.className = 'array-bar';
-            bar.id = \`bar-\${i}\`; // Important for reuse
-            bar.style.height = \`\${val * 3}px\`;
-            container.appendChild(bar);
-        }
-        
-        // Render Code
-        const algo = document.getElementById('algo-select').value;
-        const codeText = codeSnippets[algo];
-        if(!codeText) return; // safety
-        
-        const codeLines = codeText.split('\\n');
-        codeDisplay.innerHTML = '';
-        codeLines.forEach((line, i) => {
-            const d = document.createElement('div');
-            d.className = 'code-line';
-            d.id = \`line-\${i+1}\`;
-            d.innerText = line;
-            codeDisplay.appendChild(d);
-        });
+      pause();
+      initialArray = [];
+      containerEl.innerHTML = '';
 
-        // Record
-        frames = [];
-        const recorder = new Recorder([...initialArray]);
-        
-        if(algo === 'bubble') bubbleSort(recorder);
-        if(algo === 'insertion') insertionSort(recorder);
-        if(algo === 'selection') selectionSort(recorder);
-        if(algo === 'quick') quickSort(recorder, 0, ARRAY_SIZE-1);
-        if(algo === 'merge') mergeSort(recorder, 0, ARRAY_SIZE-1);
-        if(algo === 'heap') heapSort(recorder);
-        if(algo === 'radix') radixSort(recorder);
-        
-        recorder.addFrame(null, [], 'Sorted!', 'sorted');
-        frames = recorder.frames;
-        
-        currentFrameIndex = 0;
-        updateView(0);
-        updateSpeed();
-        setMascot('idle', "Ready!");
-        
-        // Ensure play button is reset
-        playBtn.innerText = "Start ✨";
+      // Generate and CREATE DOM bars once
+      for (let i = 0; i < ARRAY_SIZE; i++) {
+        const val = Math.floor(Math.random() * 80) + 10;
+        initialArray.push(val);
+
+        const bar = document.createElement('div');
+        bar.className = 'array-bar';
+        bar.id = `bar-${i}`;
+        bar.style.height = `${val * 3}px`;
+        bar.innerText = val; // Show value
+        containerEl.appendChild(bar);
+      }
+
+      // Render Code
+      const algo = document.getElementById('algo-select').value;
+      const codeText = codeSnippets[algo];
+      if (!codeText) return; // safety
+
+      const codeLines = codeText.split('\n');
+      codeDisplayEl.innerHTML = '';
+      codeLines.forEach((line, i) => {
+        const d = document.createElement('div');
+        d.className = 'code-line';
+        d.id = `line-${i + 1}`;
+
+        let html = line
+          .replace(/\b(def|for|in|range|if|while|return|len)\b/g, '<span class="kwd">$1</span>')
+          .replace(/\b(\d+)\b/g, '<span class="num">$1</span>')
+          .replace(/\b(bubble_sort|insertion_sort|selection_sort|merge_sort|quick_sort|heap_sort|radix_sort|partition|heapify|counting_sort|merge)\b/g, '<span class="func">$1</span>');
+
+        d.innerHTML = html;
+        codeDisplayEl.appendChild(d);
+      });
+
+      // Record
+      frames = [];
+      const recorder = new Recorder([...initialArray]);
+
+      if (algo === 'bubble') bubbleSort(recorder);
+      if (algo === 'insertion') insertionSort(recorder);
+      if (algo === 'selection') selectionSort(recorder);
+      if (algo === 'quick') quickSort(recorder, 0, ARRAY_SIZE - 1);
+      if (algo === 'merge') mergeSort(recorder, 0, ARRAY_SIZE - 1);
+      if (algo === 'heap') heapSort(recorder);
+      if (algo === 'radix') radixSort(recorder);
+
+      recorder.addFrame(null, [], 'Sorted!', 'sorted');
+      frames = recorder.frames;
+
+      currentFrameIndex = 0;
+      updateView(0);
+      updateSpeed();
+      setMascot('idle', "Ready!");
+
+      // Ensure play button is reset
+      playBtnEl.innerText = "Start ✨";
     }
 
     /* --- Recorder --- */
     class Recorder {
-        constructor(array) {
-            this.array = [...array];
-            this.frames = [];
-            this.addFrame(null, [], "Ready");
-        }
-        
-        addFrame(lineNum, highlights, text, mascot, sortedCount=0) {
-            this.frames.push({
-                arrayState: [...this.array],
-                line: lineNum,
-                highlights: highlights || [],
-                text: text || "",
-                mascot: mascot || 'idle'
-            });
+      constructor(array) {
+        this.array = [...array];
+        this.frames = [];
+        this.lastLine = null; // Track last valid line
+        this.addFrame(null, [], "Ready");
+      }
+
+      addFrame(lineNum, highlights, text, mascot, sortedCount = 0) {
+        // If we have a valid line, update tracker. 
+        // If lineNum is explicitly null but we have history, use history.
+        if (lineNum !== null && lineNum !== undefined) {
+          this.lastLine = lineNum;
+        } else if (this.lastLine !== null) {
+          lineNum = this.lastLine;
         }
 
-        compare(i, j, line) {
-            this.addFrame(line, [{index:i, type:'compare'}, {index:j, type:'compare'}], \`Comparing \${this.array[i]} vs \${this.array[j]}\`, 'compare');
-            return this.array[i] - this.array[j];
-        }
+        this.frames.push({
+          arrayState: [...this.array],
+          line: lineNum,
+          highlights: highlights || [],
+          text: text || "",
+          mascot: mascot || 'idle'
+        });
+      }
 
-        swap(i, j, line, text="Swapping!") {
-            this.addFrame(line, [{index:i, type:'swap'}, {index:j, type:'swap'}], text, 'swap');
-            let temp = this.array[i];
-            this.array[i] = this.array[j];
-            this.array[j] = temp;
-            this.addFrame(line, [{index:i, type:'swap'}, {index:j, type:'swap'}], "Swapped!", 'swap');
-        }
+      compare(i, j, line) {
+        this.addFrame(line, [{ index: i, type: 'compare' }, { index: j, type: 'compare' }], `Comparing ${this.array[i]} vs ${this.array[j]}`, 'compare');
+        return this.array[i] - this.array[j];
+      }
 
-        overwrite(i, val, line, text="Overwriting") {
-             this.array[i] = val;
-             this.addFrame(line, [{index:i, type:'swap'}], text, 'swap');
-        }
+      swap(i, j, line, text = "Swapping!") {
+        this.addFrame(line, [{ index: i, type: 'swap' }, { index: j, type: 'swap' }], text, 'swap');
+        let temp = this.array[i];
+        this.array[i] = this.array[j];
+        this.array[j] = temp;
+        this.addFrame(line, [{ index: i, type: 'swap' }, { index: j, type: 'swap' }], "Swapped!", 'swap');
+      }
+
+      overwrite(i, val, line, text = "Overwriting") {
+        this.array[i] = val;
+        this.addFrame(line, [{ index: i, type: 'swap' }], text, 'swap');
+      }
     }
-    
+
     /* --- Sorts --- */
     function bubbleSort(rec) {
-        let n = rec.array.length;
-        rec.addFrame(1);
-        for (let i = 0; i < n - 1; i++) {
-            rec.addFrame(3);
-            for (let j = 0; j < n - i - 1; j++) {
-                rec.addFrame(4);
-                if (rec.compare(j, j+1, 5) > 0) {
-                    rec.swap(j, j+1, 6);
-                }
-            }
+      let n = rec.array.length;
+      rec.addFrame(1);
+      for (let i = 0; i < n - 1; i++) {
+        rec.addFrame(3);
+        for (let j = 0; j < n - i - 1; j++) {
+          rec.addFrame(4);
+          if (rec.compare(j, j + 1, 5) > 0) {
+            rec.swap(j, j + 1, 6);
+          }
         }
+      }
     }
 
     function insertionSort(rec) {
-        let n = rec.array.length;
-        rec.addFrame(1);
-        for (let i = 1; i < n; i++) {
-            rec.addFrame(2);
-            let key = rec.array[i];
-            let j = i - 1;
-            rec.addFrame(3, [{index:i, type:'swap'}], \`Key: \${key}\`);
-            
-            rec.addFrame(5);
-            while (j >= 0 && rec.array[j] > key) {
-                rec.addFrame(5, [{index:j, type:'compare'}]);
-                rec.overwrite(j + 1, rec.array[j], 6, "Shifting");
-                j--;
-            }
-            rec.array[j + 1] = key;
-            rec.addFrame(8, [{index:j+1, type:'swap'}], "Inserting Key");
+      let n = rec.array.length;
+      rec.addFrame(1);
+      for (let i = 1; i < n; i++) {
+        rec.addFrame(2);
+        let key = rec.array[i];
+        let j = i - 1;
+        rec.addFrame(3, [{ index: i, type: 'swap' }], `Key: ${key}`);
+
+        rec.addFrame(5);
+        while (j >= 0 && rec.array[j] > key) {
+          rec.addFrame(5, [{ index: j, type: 'compare' }]);
+          rec.overwrite(j + 1, rec.array[j], 6, "Shifting");
+          j--;
         }
+        rec.array[j + 1] = key;
+        rec.addFrame(8, [{ index: j + 1, type: 'swap' }], "Inserting Key");
+      }
     }
 
     function selectionSort(rec) {
-        let n = rec.array.length;
-        rec.addFrame(1);
-        for(let i=0; i<n; i++) {
-            let minIdx = i;
-            rec.addFrame(3, [{index:i, type:'sorted'}]);
-            for(let j=i+1; j<n; j++) {
-                rec.addFrame(5, [{index:j, type:'compare'}, {index:minIdx, type:'sorted'}]);
-                if(rec.array[j] < rec.array[minIdx]) {
-                    minIdx = j;
-                    rec.addFrame(6, [{index:minIdx, type:'swap'}], "New Minimum!");
-                }
-            }
-            if(minIdx !== i) rec.swap(i, minIdx, 8);
+      let n = rec.array.length;
+      rec.addFrame(1);
+      for (let i = 0; i < n; i++) {
+        let minIdx = i;
+        rec.addFrame(3, [{ index: i, type: 'sorted' }]);
+        for (let j = i + 1; j < n; j++) {
+          rec.addFrame(5, [{ index: j, type: 'compare' }, { index: minIdx, type: 'sorted' }]);
+          if (rec.array[j] < rec.array[minIdx]) {
+            minIdx = j;
+            rec.addFrame(6, [{ index: minIdx, type: 'swap' }], "New Minimum!");
+          }
         }
+        if (minIdx !== i) rec.swap(i, minIdx, 8);
+      }
     }
-    
+
     function quickSort(rec, low, high) {
-        if(low < high) {
-            rec.addFrame(2);
-            let pi = partition(rec, low, high);
-            quickSort(rec, low, pi-1);
-            quickSort(rec, pi+1, high);
-        }
+      if (low < high) {
+        rec.addFrame(2);
+        let pi = partition(rec, low, high);
+        quickSort(rec, low, pi - 1);
+        quickSort(rec, pi + 1, high);
+      }
     }
-    
+
     function partition(rec, low, high) {
-        let pivot = rec.array[high];
-        rec.addFrame(8, [{index:high, type:'swap'}]);
-        let i = low - 1;
-        for(let j=low; j < high; j++) {
-            rec.addFrame(10, [{index:j, type:'compare'}, {index:high, type:'swap'}]);
-            if(rec.array[j] <= pivot) {
-                i++;
-                rec.swap(i, j, 12);
-            }
+      let pivot = rec.array[high];
+      rec.addFrame(8, [{ index: high, type: 'swap' }]);
+      let i = low - 1;
+      for (let j = low; j < high; j++) {
+        rec.addFrame(10, [{ index: j, type: 'compare' }, { index: high, type: 'swap' }]);
+        if (rec.array[j] <= pivot) {
+          i++;
+          rec.swap(i, j, 12);
         }
-        rec.swap(i+1, high, 13);
-        return i+1;
+      }
+      rec.swap(i + 1, high, 13);
+      return i + 1;
     }
 
     function mergeSort(rec, left, right) {
-        if(left >= right) return;
-        let mid = Math.floor((left+right)/2);
-        mergeSort(rec, left, mid);
-        mergeSort(rec, mid+1, right);
-        merge(rec, left, mid, right);
+      if (left >= right) return;
+      let mid = Math.floor((left + right) / 2);
+      mergeSort(rec, left, mid);
+      mergeSort(rec, mid + 1, right);
+      merge(rec, left, mid, right);
     }
 
     function merge(rec, left, mid, right) {
-        let temp = [];
-        let i = left, j = mid+1;
-        while(i <= mid && j <= right) {
-             rec.addFrame(10, [{index:i, type:'compare'}, {index:j, type:'compare'}]);
-             if(rec.array[i] <= rec.array[j]) temp.push(rec.array[i++]);
-             else temp.push(rec.array[j++]);
-        }
-        while(i <= mid) temp.push(rec.array[i++]);
-        while(j <= right) temp.push(rec.array[j++]);
-        
-        for(let k=0; k<temp.length; k++) {
-            rec.overwrite(left+k, temp[k], 14, "Merging");
-        }
+      let temp = [];
+      let i = left, j = mid + 1;
+      while (i <= mid && j <= right) {
+        rec.addFrame(10, [{ index: i, type: 'compare' }, { index: j, type: 'compare' }]);
+        if (rec.array[i] <= rec.array[j]) temp.push(rec.array[i++]);
+        else temp.push(rec.array[j++]);
+      }
+      while (i <= mid) temp.push(rec.array[i++]);
+      while (j <= right) temp.push(rec.array[j++]);
+
+      for (let k = 0; k < temp.length; k++) {
+        rec.overwrite(left + k, temp[k], 14, "Merging");
+      }
     }
-    
+
     function heapSort(rec) {
-        let n = rec.array.length;
-        for (let i = Math.floor(n/2)-1; i >= 0; i--) heapify(rec, n, i);
-        for (let i = n-1; i > 0; i--) {
-            rec.swap(0, i, 6);
-            heapify(rec, i, 0);
-        }
+      let n = rec.array.length;
+      for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(rec, n, i);
+      for (let i = n - 1; i > 0; i--) {
+        rec.swap(0, i, 6);
+        heapify(rec, i, 0);
+      }
     }
-    
+
     function heapify(rec, n, i) {
-        let largest = i;
-        let l = 2*i + 1, r = 2*i + 2;
-        rec.addFrame(11, [{index:i, type:'compare'}]);
-        if(l < n && rec.array[l] > rec.array[largest]) largest = l;
-        if(r < n && rec.array[r] > rec.array[largest]) largest = r;
-        if(largest !== i) {
-            rec.swap(i, largest, 15);
-            heapify(rec, n, largest);
-        }
+      let largest = i;
+      let l = 2 * i + 1, r = 2 * i + 2;
+      rec.addFrame(11, [{ index: i, type: 'compare' }]);
+      if (l < n && rec.array[l] > rec.array[largest]) largest = l;
+      if (r < n && rec.array[r] > rec.array[largest]) largest = r;
+      if (largest !== i) {
+        rec.swap(i, largest, 15);
+        heapify(rec, n, largest);
+      }
     }
-    
+
     function radixSort(rec) {
-        let maxVal = Math.max(...rec.array);
-        let exp = 1;
-        rec.addFrame(2);
-        while(Math.floor(maxVal/exp) > 0) {
-            countingSort(rec, exp);
-            exp *= 10;
-        }
+      let maxVal = Math.max(...rec.array);
+      let exp = 1;
+      rec.addFrame(2);
+      while (Math.floor(maxVal / exp) > 0) {
+        countingSort(rec, exp);
+        exp *= 10;
+      }
     }
-    
+
     function countingSort(rec, exp) {
-         let n = rec.array.length;
-         let output = new Array(n).fill(0);
-         let count = new Array(10).fill(0);
-         rec.addFrame(10, [], \`Digit: \${exp}\`);
-         for(let i=0; i<n; i++) count[Math.floor(rec.array[i]/exp)%10]++;
-         for(let i=1; i<10; i++) count[i] += count[i-1];
-         for(let i=n-1; i>=0; i--) {
-             let idx = Math.floor(rec.array[i]/exp)%10;
-             output[count[idx]-1] = rec.array[i];
-             count[idx]--;
-         }
-         for(let i=0; i<n; i++) {
-             rec.overwrite(i, output[i], 24);
-         }
+      let n = rec.array.length;
+      let output = new Array(n).fill(0);
+      let count = new Array(10).fill(0);
+      rec.addFrame(10, [], `Digit: ${exp}`);
+      for (let i = 0; i < n; i++) count[Math.floor(rec.array[i] / exp) % 10]++;
+      for (let i = 1; i < 10; i++) count[i] += count[i - 1];
+      for (let i = n - 1; i >= 0; i--) {
+        let idx = Math.floor(rec.array[i] / exp) % 10;
+        output[count[idx] - 1] = rec.array[i];
+        count[idx]--;
+      }
+      for (let i = 0; i < n; i++) {
+        rec.overwrite(i, output[i], 24);
+      }
     }
 
     /* --- Player --- */
     function updateView(index) {
-        if(index < 0 || index >= frames.length) return;
-        const frame = frames[index];
-        const prevFrame = frames[index-1];
-        
-        const bars = container.children;
-        for(let i=0; i<bars.length; i++) {
-            const bar = bars[i];
-            const newVal = frame.arrayState[i];
-            const currentH = parseInt(bar.style.height);
-            
-            if(Math.abs(currentH/3 - newVal) > 0.1) {
-                 bar.style.height = \`\${newVal * 3}px\`;
-            }
+      if (index < 0 || index >= frames.length) return;
+      const frame = frames[index];
+      const prevFrame = frames[index - 1];
 
-            bar.className = 'array-bar';
-            
-            const hl = frame.highlights.find(h => h.index === i);
-            if(hl) bar.classList.add(hl.type);
-            
-            if(index === frames.length - 1) bar.classList.add('sorted');
+      const bars = containerEl.children;
+      for (let i = 0; i < bars.length; i++) {
+        const bar = bars[i];
+        const newVal = frame.arrayState[i];
+        const currentH = parseInt(bar.style.height);
+
+        if (Math.abs(currentH / 3 - newVal) > 0.1) {
+          bar.style.height = `${newVal * 3}px`;
+          bar.innerText = newVal; // Update value text
         }
-        
-        document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
-        if(frame.line) {
-             const el = document.getElementById(\`line-\${frame.line}\`);
-             if(el) {
-                 el.classList.add('active');
-                 el.scrollIntoView({behavior: "smooth", block: "center"});
-             }
+
+        bar.className = 'array-bar';
+
+        const hl = frame.highlights.find(h => h.index === i);
+        if (hl) bar.classList.add(hl.type);
+
+        if (index === frames.length - 1) bar.classList.add('sorted');
+      }
+
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      if (frame.line) {
+        const el = document.getElementById(`line-${frame.line}`);
+        if (el) {
+          el.classList.add('active');
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-        
-        explanation.innerText = frame.text;
-        if(!prevFrame || frame.mascot !== prevFrame.mascot) {
-            setMascot(frame.mascot);
-        }
+      }
+
+      explanationEl.innerText = frame.text;
+      if (!prevFrame || frame.mascot !== prevFrame.mascot) {
+        setMascot(frame.mascot);
+      }
     }
 
     function togglePlay() {
-        if(isPlaying) pause();
-        else play();
+      if (isPlaying) pause();
+      else play();
     }
 
     function play() {
-        isPlaying = true;
-        playBtn.innerText = "Pause ⏸️";
-        if(currentFrameIndex >= frames.length -1) currentFrameIndex = 0;
-        
-        playInterval = setInterval(() => {
-            currentFrameIndex++;
-            if(currentFrameIndex >= frames.length) {
-                pause();
-                currentFrameIndex = frames.length - 1;
-                setMascot('sorted', "Done!");
-            }
-            updateView(currentFrameIndex);
-        }, frameRate);
+      isPlaying = true;
+      playBtnEl.innerText = "Pause ⏸️";
+      if (currentFrameIndex >= frames.length - 1) currentFrameIndex = 0;
+
+      playInterval = setInterval(() => {
+        currentFrameIndex++;
+        if (currentFrameIndex >= frames.length) {
+          pause();
+          currentFrameIndex = frames.length - 1;
+          setMascot('sorted', "Done!");
+        }
+        updateView(currentFrameIndex);
+      }, frameRate);
     }
 
     function pause() {
-        isPlaying = false;
-        playBtn.innerText = "Start ✨";
-        if(playInterval) clearInterval(playInterval);
+      isPlaying = false;
+      playBtnEl.innerText = "Start ✨";
+      if (playInterval) clearInterval(playInterval);
     }
 
     function prevStep() {
-        pause();
-        if(currentFrameIndex > 0) {
-            currentFrameIndex--;
-            updateView(currentFrameIndex);
-        }
+      pause();
+      if (currentFrameIndex > 0) {
+        currentFrameIndex--;
+        updateView(currentFrameIndex);
+      }
     }
 
     function nextStep() {
-        pause();
-        if(currentFrameIndex < frames.length - 1) {
-            currentFrameIndex++;
-            updateView(currentFrameIndex);
-        }
+      pause();
+      if (currentFrameIndex < frames.length - 1) {
+        currentFrameIndex++;
+        updateView(currentFrameIndex);
+      }
     }
-    
+
     function updateSpeed() {
-        const val = parseInt(document.getElementById('speed').value);
-        const multi = (val / 10).toFixed(1);
-        document.getElementById('speed-label').innerText = \`Speed: \${multi}x\`;
-        
-        frameRate = 1000 / val;
-        
-        if(isPlaying) {
-            pause();
-            play();
-        }
+      const val = parseInt(document.getElementById('speed').value);
+      const multi = (val / 10).toFixed(1);
+      document.getElementById('speed-label').innerText = `Speed: ${multi}x`;
+
+      frameRate = 1000 / val;
+
+      if (isPlaying) {
+        pause();
+        play();
+      }
     }
 
     const mascotData = {
-        idle: { char: "🧙‍♂️", phrases: ["Magic time!", "Ready? Cast 'Start'!", "Alchemy in progress..."] },
-        compare: { char: "👀", phrases: ["Focus...", "Analyzing...", "Comparing essences..."] },
-        swap: { char: "✨", phrases: ["Diffindo!", "Switchus!", "Transmute!"] },
-        sorted: { char: "🎉", phrases: ["Mischief Managed!", "Pure Magic!", "Sorted!"] }
+      idle: { char: "🧙‍♂️", phrases: ["Magic time!", "Ready? Cast 'Start'!", "Alchemy in progress..."] },
+      compare: { char: "👀", phrases: ["Focus...", "Analyzing...", "Comparing essences..."] },
+      swap: { char: "✨", phrases: ["Diffindo!", "Switchus!", "Transmute!"] },
+      sorted: { char: "🎉", phrases: ["Mischief Managed!", "Pure Magic!", "Sorted!"] }
     }
 
     function setMascot(state, overrideText) {
-        const data = mascotData[state] || mascotData.idle;
-        mascotChar.innerText = data.char;
-        mascotBubble.innerText = overrideText || data.phrases[Math.floor(Math.random()*data.phrases.length)];
-        mascotBubble.classList.add('show');
+      const data = mascotData[state] || mascotData.idle;
+      mascotCharEl.innerText = data.char;
+      mascotBubbleEl.innerText = overrideText || data.phrases[Math.floor(Math.random() * data.phrases.length)];
+      mascotBubbleEl.classList.add('show');
     }
+
+    /* --- Shortcuts --- */
+    document.addEventListener('keydown', (e) => {
+      if (welcomeActive) return; // Disable shortcuts if in welcome mode
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        nextStep();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        prevStep();
+      } else if (e.code === 'KeyR') {
+        e.preventDefault();
+        resetController();
+      }
+    });
 
   </script>
 </body>

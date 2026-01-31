@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter the Sort Visualizer</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Loading Overlay */
+        #loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            letter-spacing: 5px;
+            color: #58a6ff;
+            animation: blink 1s infinite alternate;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        @keyframes blink {
+            from {
+                opacity: 0.3;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* UI Overlay */
+        #ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            pointer-events: none;
+            /* Let clicks pass to canvas if needed, but button needs events */
+        }
+
+        h1 {
+            font-size: 4rem;
+            text-transform: uppercase;
+            letter-spacing: 15px;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 20px rgba(88, 166, 255, 0.8), 0 0 40px rgba(88, 166, 255, 0.4);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 2s cubic-bezier(0.19, 1, 0.22, 1) forwards 0.5s;
+        }
+
+        .enter-btn {
+            pointer-events: auto;
+            padding: 20px 60px;
+            font-size: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 2s cubic-bezier(0.19, 1, 0.22, 1) forwards 1s;
+        }
+
+        .enter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .enter-btn:hover {
+            background: rgba(88, 166, 255, 0.2);
+            border-color: #58a6ff;
+            box-shadow: 0 0 30px rgba(88, 166, 255, 0.5), inset 0 0 20px rgba(88, 166, 255, 0.2);
+            transform: scale(1.05);
+            text-shadow: 0 0 10px #58a6ff;
+        }
+
+        .enter-btn:hover::before {
+            left: 100%;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loader">INITIALIZING ENGINE...</div>
+
+    <div id="ui-container">
+        <h1>Sort Visualizer</h1>
+        <button class="enter-btn" onclick="enterApp()">Initialize</button>
+    </div>
+
+    <!-- Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        /* --- CONFIG --- */
+        const CONFIG = {
+            count: 150,
+            range: 800,
+            cameraSpeed: 0.05,
+            colors: [0x58a6ff, 0xd2a8ff, 0x238636, 0xf85149]
+        };
+
+        let scene, camera, renderer, particles, columns = [];
+        let mouseX = 0, mouseY = 0;
+
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.0015);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
+            camera.position.z = 600;
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x222222);
+            scene.add(ambientLight);
+
+            const light1 = new THREE.PointLight(0x58a6ff, 2, 500);
+            light1.position.set(200, 200, 200);
+            scene.add(light1);
+
+            const light2 = new THREE.PointLight(0xd2a8ff, 2, 500);
+            light2.position.set(-200, -200, 200);
+            scene.add(light2);
+
+            // --- Objects: Abstract "Data Pillars" ---
+            const geometry = new THREE.BoxGeometry(20, 1, 20);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8,
+                shininess: 100,
+                emissive: 0x111111
+            });
+
+            for (let i = 0; i < CONFIG.count; i++) {
+                const mesh = new THREE.Mesh(geometry, material.clone());
+
+                // Random positions
+                mesh.position.x = (Math.random() - 0.5) * CONFIG.range * 1.5;
+                mesh.position.y = (Math.random() - 0.5) * CONFIG.range;
+                mesh.position.z = (Math.random() - 0.5) * CONFIG.range * 1.5;
+
+                // Random height (like sorting bars)
+                const height = Math.random() * 200 + 20;
+                mesh.scale.y = height;
+
+                // Random Color
+                const color = CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)];
+                mesh.material.color.setHex(color);
+                mesh.material.emissive.setHex(color);
+                mesh.material.emissiveIntensity = 0.2;
+
+                mesh.userData = {
+                    speed: Math.random() * 0.2 + 0.05,
+                    yBase: mesh.position.y
+                };
+
+                scene.add(mesh);
+                columns.push(mesh);
+            }
+
+            // --- Particles ---
+            const particlesGeo = new THREE.BufferGeometry();
+            const posArray = new Float32Array(2000 * 3);
+            for (let i = 0; i < 2000 * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 2000;
+            }
+            particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMat = new THREE.PointsMaterial({
+                size: 2,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.5
+            });
+            particles = new THREE.Points(particlesGeo, particlesMat);
+            scene.add(particles);
+
+            // Events
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', onDocumentMouseMove);
+
+            // Hide Loader
+            document.getElementById('loader').style.display = 'none';
+
+            animate();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onDocumentMouseMove(event) {
+            mouseX = (event.clientX - window.innerWidth / 2) / 2;
+            mouseY = (event.clientY - window.innerHeight / 2) / 2;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        function render() {
+            const time = Date.now() * 0.0005;
+
+            // Camera Sway using Mouse
+            camera.position.x += (mouseX - camera.position.x) * CONFIG.cameraSpeed;
+            camera.position.y += (-mouseY - camera.position.y) * CONFIG.cameraSpeed;
+            camera.lookAt(scene.position);
+
+            // Animate Pillars (Bobbing Effect)
+            columns.forEach((mesh, i) => {
+                mesh.position.y = mesh.userData.yBase + Math.sin(time + i) * 20;
+                mesh.rotation.y += 0.005;
+            });
+
+            // Animate Particles
+            particles.rotation.y += 0.001;
+            particles.rotation.x += 0.0005;
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = init;
+
+        // --- Enter Function ---
+        window.enterApp = function () {
+            const btn = document.querySelector('.enter-btn');
+            btn.innerHTML = "LOADING SYSTEM...";
+            btn.style.borderColor = "#fff";
+            btn.style.background = "#fff";
+            btn.style.color = "#000";
+
+            // Camera Zoom Effect
+            CONFIG.cameraSpeed = 0; // Disable mouse sway
+
+            let zoomIn = setInterval(() => {
+                camera.position.z -= 10;
+                if (camera.position.z < -100) {
+                    clearInterval(zoomIn);
+                    window.location.href = 'index.html';
+                }
+            }, 16);
+        };
+    </script>
+</body>
+
+</html>
