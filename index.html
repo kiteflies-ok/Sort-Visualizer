@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sort Visualizer - Python Edition</title>
+  <title>Sort Visualizer - Ultimate Edition</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,57 +17,92 @@
   <style>
     :root {
       --bg-color: #0d1117;
-      --panel-bg: rgba(22, 27, 34, 0.8);
+      --panel-bg: rgba(22, 27, 34, 0.9);
       --accent-color: #58a6ff;
       --highlight-color: #d2a8ff;
       --bar-default: #238636;
       --bar-compare: #d29922;
       --bar-swap: #f85149;
+      --bar-overwrite: #f0883e;
       --text-main: #c9d1d9;
-      --code-bg: #0d1117;
-      --neon-glow: 0 0 10px rgba(88, 166, 255, 0.5);
+      --neon-glow: 0 0 15px rgba(88, 166, 255, 0.4);
     }
 
     body {
       font-family: 'Fredoka', sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       background-color: var(--bg-color);
       color: var(--text-main);
-      background-image: radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.1) 0%, transparent 20%),
-        radial-gradient(circle at 90% 80%, rgba(210, 168, 255, 0.1) 0%, transparent 20%);
+      background-image:
+        radial-gradient(at 0% 0%, rgba(88, 166, 255, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(210, 168, 255, 0.15) 0px, transparent 50%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    /* --- Mascot --- */
+    /* --- Header & Logo --- */
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+
+    .logo-img {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 4px solid var(--accent-color);
+      box-shadow: 0 0 20px var(--accent-color);
+      transition: transform 0.3s;
+    }
+
+    .logo-img:hover {
+      transform: scale(1.05) rotate(5deg);
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      color: var(--accent-color);
+      text-shadow: 4px 4px 0px #053a11;
+      font-size: 2.2rem;
+      line-height: 1.4;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    /* --- Mascot (Friendly Wizard) --- */
     #mascot-container {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 30px;
+      right: 30px;
       display: flex;
       align-items: flex-end;
-      gap: 10px;
+      gap: 15px;
       z-index: 100;
       pointer-events: none;
-      /* Let clicks pass through */
     }
 
     #mascot-bubble {
       background: white;
-      color: #333;
-      padding: 15px;
-      border-radius: 20px 20px 0 20px;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 12px;
-      line-height: 1.5;
+      color: #222;
+      padding: 20px;
+      border-radius: 25px 25px 0 25px;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 1.4;
       max-width: 250px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
       opacity: 0;
       transform: translateY(20px);
-      transition: opacity 0.3s, transform 0.3s;
+      transition: opacity 0.3s, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     #mascot-bubble.show {
@@ -76,144 +111,186 @@
     }
 
     #mascot-char {
-      font-size: 60px;
-      filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
-      animation: float 3s ease-in-out infinite;
+      font-size: 90px;
+      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.4));
+      animation: float 4s ease-in-out infinite;
+      transform-origin: bottom center;
     }
 
     @keyframes float {
 
       0%,
       100% {
-        transform: translateY(0);
+        transform: translateY(0) rotate(0deg);
       }
 
       50% {
-        transform: translateY(-10px);
+        transform: translateY(-15px) rotate(2deg);
       }
     }
 
-
-    /* --- Layout --- */
-    h1 {
-      font-family: 'Press Start 2P', cursive;
-      text-align: center;
-      color: var(--accent-color);
-      text-shadow: 4px 4px 0px #238636;
-      margin-bottom: 30px;
-      font-size: 2rem;
-      line-height: 1.5;
-    }
-
+    /* --- Panels --- */
     .main-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
-      width: 100%;
-      max-width: 1200px;
+      gap: 25px;
+      width: 90%;
+      max-width: 1400px;
       justify-content: center;
+      margin-bottom: 50px;
     }
 
-    /* --- Panels --- */
     .glass-panel {
       background: var(--panel-bg);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
     }
 
     #visualizer-panel {
-      flex: 2;
-      min-width: 300px;
-      display: flex;
-      flex-direction: column;
+      flex: 5;
+      min-width: 450px;
       align-items: center;
-      min-height: 400px;
+      min-height: 500px;
     }
 
     #code-panel-container {
-      flex: 1;
-      min-width: 300px;
-      display: flex;
-      flex-direction: column;
+      flex: 2;
+      min-width: 350px;
+      height: 650px;
+      /* Fixed height for scroll */
     }
 
     /* --- Controls --- */
-    .controls {
+    .controls-wrapper {
+      width: 100%;
       display: flex;
+      justify-content: space-between;
+      align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
+      gap: 20px;
       margin-bottom: 20px;
     }
 
-    .control-btn {
-      background: var(--bg-color);
-      border: 2px solid var(--accent-color);
-      color: var(--accent-color);
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-transform: uppercase;
+    .btn-group {
+      display: flex;
+      gap: 12px;
     }
 
-    .control-btn:hover {
+    .control-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid var(--accent-color);
+      color: var(--accent-color);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-family: 'Fredoka', cursive;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-btn:hover:not(:disabled) {
       background: var(--accent-color);
-      color: var(--bg-color);
-      transform: translateY(-2px);
+      color: #000;
+      transform: translateY(-3px);
       box-shadow: var(--neon-glow);
     }
 
-    select {
-      background: var(--bg-color);
-      border: 2px solid var(--highlight-color);
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      border-color: #555;
+      color: #555;
+    }
+
+    .control-btn.primary {
+      background: var(--accent-color);
+      color: #051d38;
+    }
+
+    .control-btn.primary:hover {
+      background: #80c2ff;
+      color: #000;
+    }
+
+    /* Speed Control */
+    .speed-control {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 5px 15px;
+      border-radius: 10px;
+    }
+
+    .speed-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
       color: var(--highlight-color);
-      padding: 10px;
-      border-radius: 8px;
-      font-family: 'Fredoka', sans-serif;
-      font-weight: bold;
-      cursor: pointer;
+      margin-bottom: 5px;
     }
 
     input[type=range] {
-      accent-color: var(--bar-compare);
+      width: 120px;
+      accent-color: var(--highlight-color);
+      cursor: pointer;
+    }
+
+    select {
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid var(--bar-compare);
+      color: var(--bar-compare);
+      padding: 12px;
+      border-radius: 12px;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      outline: none;
     }
 
     /* --- Array Bars --- */
     #array-container {
+      flex-grow: 1;
       display: flex;
       align-items: flex-end;
-      /* Align bars to bottom */
       justify-content: center;
-      height: 300px;
       width: 100%;
       gap: 4px;
-      margin-top: 20px;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      /* padding-bottom: 20px; */
     }
 
     .array-bar {
-      width: 20px;
+      flex: 1;
       background-color: var(--bar-default);
-      transition: height 0.2s ease, background-color 0.2s;
-      border-radius: 4px 4px 0 0;
-      box-shadow: 0 0 5px var(--bar-default);
-      /* No text inside bars to keep it clean, can add tooltip if needed */
+      border-radius: 6px 6px 0 0;
+      box-shadow: inset 0 -2px 5px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.1s;
+      position: relative;
     }
+
+    /* Text inside bar for small arrays? No, too cluttered. Tooltip on hover maybe */
 
     .array-bar.compare {
       background-color: var(--bar-compare);
-      box-shadow: 0 0 10px var(--bar-compare);
+      box-shadow: 0 0 15px var(--bar-compare);
     }
 
     .array-bar.swap {
       background-color: var(--bar-swap);
       box-shadow: 0 0 15px var(--bar-swap);
+    }
+
+    .array-bar.overwrite {
+      background-color: var(--bar-overwrite);
     }
 
     .array-bar.sorted {
@@ -222,108 +299,149 @@
     }
 
     /* --- Code Panel --- */
+    h3.panel-title {
+      margin: 0 0 15px 0;
+      color: var(--text-main);
+      font-family: 'Press Start 2P';
+      font-size: 12px;
+      text-transform: uppercase;
+      border-bottom: 2px solid #333;
+      padding-bottom: 10px;
+    }
+
     #code-display {
       font-family: 'Fira Code', monospace;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.6;
-      background: #000;
-      padding: 15px;
       border-radius: 8px;
-      overflow-x: auto;
+      overflow-y: auto;
+      flex-grow: 1;
       white-space: pre;
     }
 
     .code-line {
-      display: block;
-      padding: 0 5px;
+      padding: 2px 10px;
+      margin: 2px 0;
+      border-radius: 4px;
       border-left: 3px solid transparent;
+      opacity: 0.6;
     }
 
     .code-line.active {
-      background-color: rgba(210, 168, 255, 0.2);
+      background-color: rgba(210, 168, 255, 0.15);
       border-left-color: var(--highlight-color);
       color: #fff;
-      text-shadow: 0 0 2px var(--highlight-color);
+      opacity: 1;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
+    /* Current Step Info */
     #explanation {
       margin-top: 15px;
-      font-size: 1.1rem;
+      font-size: 18px;
+      font-weight: 600;
       text-align: center;
-      color: var(--text-main);
-      min-height: 50px;
+      color: var(--accent-color);
+      min-height: 30px;
     }
 
-    /* Decoration */
-    .logo-img {
-      width: 60px;
-      height: auto;
-      vertical-align: middle;
-      margin-right: 15px;
-      border-radius: 50%;
-      border: 2px solid var(--accent-color);
+    #progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #222;
+      border-radius: 3px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+
+    #progress-fill {
+      height: 100%;
+      background: var(--accent-color);
+      width: 0%;
+      transition: width 0.1s linear;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>
-    <img src="ravenclaw.png" alt="" class="logo-img" onerror="this.style.display='none'">
-    Sort Visualizer
-  </h1>
-
-  <div class="controls glass-panel">
-    <select id="algo-select" onchange="updateAlgo()">
-      <option value="bubble">Bubble Sort</option>
-      <option value="insertion">Insertion Sort</option>
-      <option value="selection">Selection Sort</option>
-      <option value="merge">Merge Sort</option>
-      <option value="quick">Quick Sort</option>
-    </select>
-
-    <button class="control-btn" onclick="generateArray()">Randomize 🎲</button>
-    <button class="control-btn" onclick="startSort()">Start ✨</button>
-    <button class="control-btn" onclick="togglePause()">Pause ⏸️</button>
-
-    <div style="display: flex; align-items: center; gap: 10px; margin-left: 20px;">
-      <span style="font-family: 'Press Start 2P'; font-size: 10px;">SPEED</span>
-      <input type="range" id="speed" min="50" max="800" value="300" oninput="updateSpeed()">
-    </div>
+  <div class="header-container">
+    <img src="ravenclaw.png" alt="Ravenclaw" class="logo-img"
+      onerror="this.src='https://upload.wikimedia.org/wikipedia/en/thumb/3/33/Ravenclaw_Crest.png/220px-Ravenclaw_Crest.png'">
+    <h1>Sort Visualizer<br><span style="font-size: 0.5em; color: #fff; font-family: 'Fredoka'">Ultimate Edition</span>
+    </h1>
   </div>
 
   <div class="main-container">
     <div id="visualizer-panel" class="glass-panel">
-      <div id="explanation">Ready to sort! Pick an algorithm.</div>
+
+      <div class="controls-wrapper">
+        <select id="algo-select" onchange="resetController()">
+          <option value="bubble">Bubble Sort</option>
+          <option value="insertion">Insertion Sort</option>
+          <option value="selection">Selection Sort</option>
+          <option value="merge">Merge Sort</option>
+          <option value="quick">Quick Sort</option>
+          <option value="heap">Heap Sort</option>
+          <option value="radix">Radix Sort</option>
+        </select>
+
+        <div class="btn-group">
+          <button class="control-btn" onclick="resetController()">Reset 🔄</button>
+          <button class="control-btn" onclick="prevStep()">⏪</button>
+          <button class="control-btn primary" id="play-btn" onclick="togglePlay()">Start Magic! ✨</button>
+          <button class="control-btn" onclick="nextStep()">⏩</button>
+        </div>
+
+        <div class="speed-control">
+          <div class="speed-label" id="speed-label">Speed: 1.0x</div>
+          <input type="range" id="speed" min="1" max="50" value="10" oninput="updateSpeed()">
+        </div>
+      </div>
+
       <div id="array-container"></div>
+
+      <div id="explanation">Ready to Sort!</div>
+      <div id="progress-bar">
+        <div id="progress-fill"></div>
+      </div>
+
     </div>
 
     <div id="code-panel-container" class="glass-panel">
-      <h3 style="margin-top:0; color: var(--accent-color); font-family: 'Press Start 2P'; font-size: 14px;">PYTHON CODE
-      </h3>
+      <h3 class="panel-title">Python Code Trace</h3>
       <div id="code-display"></div>
     </div>
   </div>
 
   <!-- Animated Mascot -->
   <div id="mascot-container">
-    <div id="mascot-bubble">Hello! I'm PyBot. I'll help you sort!</div>
-    <div id="mascot-char">🤖</div>
+    <div id="mascot-bubble">Welcome! I'm Merlin. Let's sort some magic bars! 🧙‍♂️</div>
+    <div id="mascot-char">🧙‍♂️</div>
   </div>
 
   <script>
-    /* --- State --- */
-    let array = [];
-    let isSorting = false;
-    let isPaused = false;
-    let speed = 300;
+    /* --- Architecture: Record & Play --- 
+       Instead of async/await, we calculate ALL frames first, then just render index i.
+    */
 
-    /* --- DOM Elements --- */
+    /* --- State --- */
+    const ARRAY_SIZE = 30;
+    let initialArray = [];
+    let frames = [];
+    let currentFrameIndex = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let frameRate = 100; // ms
+
     const container = document.getElementById('array-container');
     const codeDisplay = document.getElementById('code-display');
     const explanation = document.getElementById('explanation');
     const mascotBubble = document.getElementById('mascot-bubble');
     const mascotChar = document.getElementById('mascot-char');
+    const playBtn = document.getElementById('play-btn');
+    const progressFill = document.getElementById('progress-fill');
 
     /* --- Python Code Snippets --- */
     const codeSnippets = {
@@ -333,7 +451,8 @@
     for i in range(n - 1):
         for j in range(n - i - 1):
             if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]`,
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    return arr`,
 
       insertion:
         `def insertion_sort(arr):
@@ -356,449 +475,461 @@
 
       merge:
         `def merge_sort(left, right):
-    # This visualizer shows the merge step
-    result = []
-    i = j = 0
-    while i < len(left) and j < len(right):
-        if left[i] < right[j]:
-            result.append(left[i])
-            i += 1
-        else:
-            result.append(right[j])
-            j += 1
-    result.extend(left[i:])
-    result.extend(right[j:])`,
+    # Standard Recursive Implementation
+    if len(arr) > 1:
+        mid = len(arr) // 2
+        L = arr[:mid]
+        R = arr[mid:]
+        merge_sort(L)
+        merge_sort(R)
+        
+        i = j = k = 0
+        while i < len(L) and j < len(R):
+            if L[i] < R[j]:
+                arr[k] = L[i]; i += 1
+            else:
+                arr[k] = R[j]; j += 1
+            k += 1
+        # Check remaining
+        while i < len(L): ...
+        while j < len(R): ...`,
 
       quick:
         `def quick_sort(arr, low, high):
     if low < high:
-        # Partition step
-        pivot = arr[high]
-        i = low - 1
-        for j in range(low, high):
-            if arr[j] <= pivot:
-                i += 1
-                arr[i], arr[j] = arr[j], arr[i]
-        arr[i+1], arr[high] = arr[high], arr[i+1]`
+        pi = partition(arr, low, high)
+        quick_sort(arr, low, pi - 1)
+        quick_sort(arr, pi + 1, high)
+
+def partition(arr, low, high):
+    pivot = arr[high]
+    i = low - 1
+    for j in range(low, high):
+        if arr[j] <= pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+    arr[i+1], arr[high] = arr[high], arr[i+1]
+    return i + 1`,
+
+      heap:
+        `def heap_sort(arr):
+    n = len(arr)
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i)
+    for i in range(n - 1, 0, -1):
+        arr[i], arr[0] = arr[0], arr[i]
+        heapify(arr, i, 0)
+
+def heapify(arr, n, i):
+    largest = i
+    l = 2 * i + 1; r = 2 * i + 2
+    if l < n and arr[l] > arr[largest]: largest = l
+    if r < n and arr[r] > arr[largest]: largest = r
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        heapify(arr, n, largest)`,
+
+      radix:
+        `def radix_sort(arr):
+    max_val = max(arr)
+    exp = 1
+    while max_val // exp > 0:
+        counting_sort(arr, exp)
+        exp *= 10
+
+def counting_sort(arr, exp):
+    n = len(arr)
+    output = [0] * n
+    count = [0] * 10
+    for i in range(n):
+        index = (arr[i] // exp)
+        count[index % 10] += 1
+    for i in range(1, 10):
+        count[i] += count[i - 1]
+    i = n - 1
+    while i >= 0:
+        index = (arr[i] // exp)
+        output[count[index % 10] - 1] = arr[i]
+        count[index % 10] -= 1
+        i -= 1
+    for i in range(n):
+        arr[i] = output[i]`
     };
-
-    /* --- Mascot Logic --- */
-    const mascotStates = {
-      idle: { char: "🤖", text: ["Ready to crunch data!", "Sort me up, Scotty!", "Python power!"] },
-      compare: { char: "🧐", text: ["Hmm, checking these two...", "Comparing...", "Which is bigger?"] },
-      swap: { char: "⚡", text: ["Zap! Swapping!", "Switcheroo!", "Moving data!"] },
-      sorted: { char: "🎉", text: ["All done!", "Perfectly sorted!", "Victory!"] }
-    };
-
-    function setMascot(stateKey) {
-      const state = mascotStates[stateKey];
-      mascotChar.innerText = state.char;
-
-      // Random message
-      const text = state.text[Math.floor(Math.random() * state.text.length)];
-      mascotBubble.innerText = text;
-      mascotBubble.classList.add('show');
-
-      // Hide bubble after 2s if it's a transient state
-      if (stateKey === 'compare' || stateKey === 'swap') {
-        setTimeout(() => mascotBubble.classList.remove('show'), 1500);
-      } else {
-        mascotBubble.classList.add('show');
-      }
-    }
 
     /* --- Initialization --- */
-    function init() {
-      generateArray();
-      updateAlgo();
-    }
+    window.onload = resetController;
 
-    function generateArray(size = 20) {
-      if (isSorting) return; // Prevent generating while sorting
-      array = [];
-      container.innerHTML = '';
-      for (let i = 0; i < size; i++) {
-        const val = Math.floor(Math.random() * 80) + 10; // 10-90
-        array.push(val);
-
-        const bar = document.createElement('div');
-        bar.classList.add('array-bar');
-        bar.style.height = (val * 3) + "px";
-
-        container.appendChild(bar);
+    function resetController() {
+      pause();
+      // Generate new array
+      initialArray = [];
+      for (let i = 0; i < ARRAY_SIZE; i++) {
+        initialArray.push(Math.floor(Math.random() * 90) + 10);
       }
-      setMascot('idle');
-      explanation.innerText = "Array generated with random values.";
 
-      // Clear logic highlights
-      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
-    }
-
-    function updateAlgo() {
+      // Render Code
       const algo = document.getElementById('algo-select').value;
-      const code = codeSnippets[algo];
-
-      // Render python code with line numbers
+      const codeLines = codeSnippets[algo].split('\\n');
       codeDisplay.innerHTML = '';
-      const lines = code.split('\n');
-      lines.forEach((line, idx) => {
-        const lineDiv = document.createElement('div');
-        lineDiv.classList.add('code-line');
-        lineDiv.id = `line-${idx + 1}`;
-        lineDiv.innerText = line; // Preserves whitespace via CSS pre
-        codeDisplay.appendChild(lineDiv);
-      });
+      codeLines.forEach((line, i) => {
+        const d = document.createElement('div');
+        d.className = 'code-line';
+        d.id = \`line-\${i+1}\`;
+            d.innerText = line;
+            codeDisplay.appendChild(d);
+        });
+
+        // Record Frames
+        frames = [];
+        const recorder = new Recorder([...initialArray]);
+        
+        // Call Sort Algo
+        if(algo === 'bubble') bubbleSort(recorder);
+        if(algo === 'insertion') insertionSort(recorder);
+        if(algo === 'selection') selectionSort(recorder);
+        if(algo === 'quick') quickSort(recorder, 0, ARRAY_SIZE-1);
+        if(algo === 'merge') mergeSort(recorder, 0, ARRAY_SIZE-1);
+        if(algo === 'heap') heapSort(recorder);
+        if(algo === 'radix') radixSort(recorder);
+        
+        // Add final "Done" frame
+        recorder.addFrame(null, [], 'Sorted!', 'sorted', 0);
+        frames = recorder.frames;
+        
+        // Reset View
+        currentFrameIndex = 0;
+        renderFrame(0);
+        updateSpeed();
+        setMascot('idle', "Ready!");
     }
 
-    /* --- Visualization Helpers --- */
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-    async function checkPaused() {
-      while (isPaused) {
-        await sleep(100);
-      }
-    }
-
-    function highlightLine(lineNum) {
-      // Clear previous
-      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
-      if (lineNum > 0) {
-        const el = document.getElementById(`line-${lineNum}`);
-        if (el) el.classList.add('active');
-      }
-    }
-
-    function highlightBars(indices, className) {
-      const bars = document.getElementsByClassName('array-bar');
-      indices.forEach(idx => {
-        if (bars[idx]) {
-          // Remove other logic states but keep sorted
-          bars[idx].classList.remove('compare', 'swap');
-          bars[idx].classList.add(className);
+    /* --- Recorder Class --- */
+    class Recorder {
+        constructor(array) {
+            this.array = [...array]; // Current state
+            this.frames = [];
+            // Initial Frame
+            this.addFrame(null, [], "Ready to start", 'idle', 0);
         }
-      });
+        
+        // Save a snapshot
+        // highlights: [{ index, type: 'compare'|'swap'|'sorted' }]
+        addFrame(lineNum, highlights, text, mascot, sortedCount=0) {
+            this.frames.push({
+                arrayState: [...this.array],
+                line: lineNum,
+                highlights: highlights || [],
+                text: text || "",
+                mascot: mascot || 'idle',
+                sortedCount: sortedCount
+            });
+        }
+
+        compare(i, j, line) {
+            this.addFrame(line, [{index:i, type:'compare'}, {index:j, type:'compare'}], \`Comparing \${this.array[i]} vs \${this.array[j]}\`, 'compare');
+            return this.array[i] - this.array[j];
+        }
+
+        swap(i, j, line, text="Swapping!") {
+            this.addFrame(line, [{index:i, type:'swap'}, {index:j, type:'swap'}], text, 'swap');
+            let temp = this.array[i];
+            this.array[i] = this.array[j];
+            this.array[j] = temp;
+            this.addFrame(line, [{index:i, type:'swap'}, {index:j, type:'swap'}], "Swapped!", 'swap');
+        }
+
+        overwrite(i, val, line, text="Overwriting") {
+             this.array[i] = val;
+             this.addFrame(line, [{index:i, type:'overwrite'}], text, 'swap');
+        }
     }
 
-    // New reset: clears compare/swap but KEEPS 'sorted' state
-    function resetBars() {
-      const bars = document.getElementsByClassName('array-bar');
-      for (let bar of bars) {
-        bar.classList.remove('compare', 'swap');
-      }
+    /* --- Sorting Algorithms (Synchronous Recording) --- */
+    // Note: These must match line numbers in codeSnippets roughly
+
+    function bubbleSort(rec) {
+        let n = rec.array.length;
+        rec.addFrame(1, [], "Start Bubble Sort");
+        for (let i = 0; i < n - 1; i++) {
+            rec.addFrame(3, [], "Next Pass");
+            for (let j = 0; j < n - i - 1; j++) {
+                rec.addFrame(4);
+                if (rec.compare(j, j+1, 5) > 0) {
+                    rec.swap(j, j+1, 6);
+                }
+            }
+            // Mark end as sorted logic handled by renderer implicitly? 
+            // We can add a "sorted" highlight type for static sorted bars
+        }
     }
 
-    function markSorted(index) {
-      const bars = document.getElementsByClassName('array-bar');
-      if (bars[index]) {
-        bars[index].classList.add('sorted');
-        bars[index].classList.remove('compare', 'swap');
-      }
+    function insertionSort(rec) {
+        let n = rec.array.length;
+        rec.addFrame(1);
+        for (let i = 1; i < n; i++) {
+            rec.addFrame(2);
+            let key = rec.array[i];
+            let j = i - 1;
+            rec.addFrame(3, [{index:i, type:'swap'}], \`Key: \${key}\`);
+            
+            rec.addFrame(5);
+            while (j >= 0 && rec.array[j] > key) {
+                rec.addFrame(5, [{index:j, type:'compare'}], \`\${rec.array[j]} > \${key}\`);
+                rec.overwrite(j + 1, rec.array[j], 6, "Shifting");
+                j--;
+            }
+            rec.array[j + 1] = key; // Manual write
+            rec.addFrame(8, [{index:j+1, type:'swap'}], "Inserting Key");
+        }
     }
 
-    function swapBars(i, j) {
-      const bars = document.getElementsByClassName('array-bar');
-      if (bars[i] && bars[j]) {
-        const h1 = bars[i].style.height;
-        bars[i].style.height = bars[j].style.height;
-        bars[j].style.height = h1;
-      }
+    function selectionSort(rec) {
+        let n = rec.array.length;
+        rec.addFrame(1);
+        for(let i=0; i<n; i++) {
+            let minIdx = i;
+            rec.addFrame(3, [{index:i, type:'sorted'}], "Current Min");
+            for(let j=i+1; j<n; j++) {
+                rec.addFrame(5, [{index:j, type:'compare'}, {index:minIdx, type:'sorted'}]);
+                if(rec.array[j] < rec.array[minIdx]) {
+                    minIdx = j;
+                    rec.addFrame(6, [{index:minIdx, type:'swap'}], "New Minimum Found!");
+                }
+            }
+            if(minIdx !== i) rec.swap(i, minIdx, 8);
+        }
+    }
+    
+    function quickSort(rec, low, high) {
+        if(low < high) {
+            rec.addFrame(2);
+            let pi = partition(rec, low, high);
+            quickSort(rec, low, pi-1);
+            quickSort(rec, pi+1, high);
+        }
+    }
+    
+    function partition(rec, low, high) {
+        let pivot = rec.array[high];
+        rec.addFrame(8, [{index:high, type:'swap'}], \`Pivot: \${pivot}\`);
+        let i = low - 1;
+        for(let j=low; j < high; j++) {
+            rec.addFrame(10, [{index:j, type:'compare'}, {index:high, type:'swap'}]);
+            if(rec.array[j] <= pivot) {
+                i++;
+                rec.swap(i, j, 12, "Swapping smaller element");
+            }
+        }
+        rec.swap(i+1, high, 13, "Placing pivot");
+        return i+1;
     }
 
-    function updateHeight(i, val) {
-      const bars = document.getElementsByClassName('array-bar');
-      if (bars[i]) bars[i].style.height = `${val * 3}px`;
+    function mergeSort(rec, left, right) {
+        if(left >= right) return;
+        let mid = Math.floor((left+right)/2);
+        mergeSort(rec, left, mid);
+        mergeSort(rec, mid+1, right);
+        merge(rec, left, mid, right);
     }
 
+    function merge(rec, left, mid, right) {
+        // Simplified visualization: Just show the overwrite steps
+        let temp = [];
+        let i = left, j = mid+1;
+        while(i <= mid && j <= right) {
+             rec.addFrame(10, [{index:i, type:'compare'}, {index:j, type:'compare'}]);
+             if(rec.array[i] <= rec.array[j]) {
+                 temp.push(rec.array[i++]);
+             } else {
+                 temp.push(rec.array[j++]);
+             }
+        }
+        while(i <= mid) temp.push(rec.array[i++]);
+        while(j <= right) temp.push(rec.array[j++]);
+        
+        // Write back
+        for(let k=0; k<temp.length; k++) {
+            rec.overwrite(left+k, temp[k], 14, "Merging sorted value");
+        }
+    }
+    
+    function heapSort(rec) {
+        let n = rec.array.length;
+        // Build heap
+        for (let i = Math.floor(n/2)-1; i >= 0; i--) heapify(rec, n, i);
+        
+        // Extract
+        for (let i = n-1; i > 0; i--) {
+            rec.swap(0, i, 6, "Move max to end");
+            heapify(rec, i, 0);
+        }
+    }
+    
+    function heapify(rec, n, i) {
+        let largest = i;
+        let l = 2*i + 1, r = 2*i + 2;
+        rec.addFrame(11, [{index:i, type:'compare'}]);
+        
+        if(l < n && rec.array[l] > rec.array[largest]) largest = l;
+        if(r < n && rec.array[r] > rec.array[largest]) largest = r;
+        
+        if(largest !== i) {
+            rec.swap(i, largest, 15, "Fixing Heap Property");
+            heapify(rec, n, largest);
+        }
+    }
+    
+    function radixSort(rec) {
+        let maxVal = Math.max(...rec.array);
+        let exp = 1;
+        rec.addFrame(2);
+        while(Math.floor(maxVal/exp) > 0) {
+            countingSort(rec, exp);
+            exp *= 10;
+        }
+    }
+    
+    function countingSort(rec, exp) {
+         let n = rec.array.length;
+         let output = new Array(n).fill(0);
+         let count = new Array(10).fill(0);
+         
+         // Visual limitation: Radix is hard to show in-place. We will just show the final write back for this pass.
+         rec.addFrame(10, [], \`Sorting digit place: \${exp}\`);
+         
+         for(let i=0; i<n; i++) count[Math.floor(rec.array[i]/exp)%10]++;
+         for(let i=1; i<10; i++) count[i] += count[i-1];
+         
+         for(let i=n-1; i>=0; i--) {
+             let idx = Math.floor(rec.array[i]/exp)%10;
+             output[count[idx]-1] = rec.array[i];
+             count[idx]--;
+         }
+         
+         for(let i=0; i<n; i++) {
+             rec.overwrite(i, output[i], 24, "Rebuilding array based on digit");
+         }
+    }
+
+
+    /* --- Player Logic --- */
+    function renderFrame(index) {
+        if(index < 0 || index >= frames.length) return;
+        const frame = frames[index];
+        const prevFrame = frames[index-1];
+        
+        // Render Array
+        container.innerHTML = '';
+        frame.arrayState.forEach((val, idx) => {
+            const bar = document.createElement('div');
+            bar.className = 'array-bar';
+            bar.style.height = \`\${val * 3}px\`;
+            
+            // Check highlights
+            const hl = frame.highlights.find(h => h.index === idx);
+            if(hl) bar.classList.add(hl.type);
+            
+            // Heuristic for "Sorted": if frame is final, or bubbled to end
+            if(index === frames.length-1) bar.classList.add('sorted');
+            
+            container.appendChild(bar);
+        });
+        
+        // Render Code Highlight
+        document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+        if(frame.line) {
+             const el = document.getElementById(\`line-\${frame.line}\`);
+             if(el) {
+                 el.classList.add('active');
+                 el.scrollIntoView({behavior: "smooth", block: "center"});
+             }
+        }
+        
+        // Text & Mascot
+        explanation.innerText = frame.text;
+        if(!prevFrame || frame.mascot !== prevFrame.mascot) {
+            setMascot(frame.mascot);
+        }
+        
+        // Progress
+        const pct = ((index+1) / frames.length) * 100;
+        progressFill.style.width = \`\${pct}%\`;
+    }
+
+    function togglePlay() {
+        if(isPlaying) pause();
+        else play();
+    }
+
+    function play() {
+        isPlaying = true;
+        playBtn.innerText = "Pause ⏸️";
+        if(currentFrameIndex >= frames.length -1) currentFrameIndex = 0;
+        
+        playInterval = setInterval(() => {
+            currentFrameIndex++;
+            if(currentFrameIndex >= frames.length) {
+                pause();
+                currentFrameIndex = frames.length - 1;
+                setMascot('sorted', "Done!");
+            }
+            renderFrame(currentFrameIndex);
+        }, frameRate);
+    }
+
+    function pause() {
+        isPlaying = false;
+        playBtn.innerText = "Resume ▶️";
+        if(playInterval) clearInterval(playInterval);
+    }
+
+    function prevStep() {
+        pause();
+        if(currentFrameIndex > 0) {
+            currentFrameIndex--;
+            renderFrame(currentFrameIndex);
+        }
+    }
+
+    function nextStep() {
+        pause();
+        if(currentFrameIndex < frames.length - 1) {
+            currentFrameIndex++;
+            renderFrame(currentFrameIndex);
+        }
+    }
+    
     function updateSpeed() {
-      const val = document.getElementById('speed').value;
-      speed = 1000 - val; // Invert: High value = fast = low ms
-    }
-
-    function togglePause() {
-      isPaused = !isPaused;
-      document.querySelector('button[onclick="togglePause()"]').innerText = isPaused ? "Resume ▶️" : "Pause ⏸️";
-    }
-
-    /* --- Sort Algorithms --- */
-
-    async function startSort() {
-      if (isSorting) return;
-      isSorting = true;
-      setMascot('idle');
-      const algo = document.getElementById('algo-select').value;
-
-      try {
-        if (algo === 'bubble') await bubbleSort();
-        if (algo === 'insertion') await insertionSort();
-        if (algo === 'selection') await selectionSort();
-        if (algo === 'quick') await startQuickSort();
-        if (algo === 'merge') await startMergeSort();
-
-        // Finish
-        highlightLine(0);
-        resetBars();
-        const bars = document.getElementsByClassName('array-bar');
-        for (let bar of bars) bar.classList.add('sorted');
-        setMascot('sorted');
-        explanation.innerText = "Sort Complete!";
-      } catch (e) {
-        console.log("Sort interrupted", e);
-      } finally {
-        isSorting = false;
-      }
-    }
-
-    // --- Bubble Sort ---
-    async function bubbleSort() {
-      const n = array.length;
-      highlightLine(1); await sleep(speed);
-
-      for (let i = 0; i < n - 1; i++) {
-        highlightLine(3);
-        await checkPaused();
-
-        for (let j = 0; j < n - i - 1; j++) {
-          highlightLine(4);
-          resetBars();
-          highlightBars([j, j + 1], 'compare');
-          setMascot('compare');
-          explanation.innerText = `Comparing ${array[j]} and ${array[j + 1]}`;
-          await sleep(speed);
-          await checkPaused();
-
-          highlightLine(5);
-          if (array[j] > array[j + 1]) {
-            explanation.innerText = `${array[j]} > ${array[j + 1]}, swapping!`;
-            setMascot('swap');
-            highlightBars([j, j + 1], 'swap');
-
-            highlightLine(6);
-            // Swap data
-            let temp = array[j];
-            array[j] = array[j + 1];
-            array[j + 1] = temp;
-            // Swap Visuals
-            swapBars(j, j + 1);
-            await sleep(speed);
-          }
+        const val = parseInt(document.getElementById('speed').value); // 1 to 50
+        // val=1 => speed=1000ms, val=50 => speed=20ms
+        // Formula: 1000 / val
+        const multi = (val / 10).toFixed(1);
+        document.getElementById('speed-label').innerText = \`Speed: \${multi}x\`;
+        
+        frameRate = 1000 / val;
+        
+        if(isPlaying) {
+            pause();
+            play();
         }
-        // Mark end as sorted
-        markSorted(n - 1 - i);
-      }
-      markSorted(0); // Last one
     }
 
-    // --- Insertion Sort ---
-    async function insertionSort() {
-      highlightLine(1); await sleep(speed);
-      // Mark first as implicitly sorted
-      markSorted(0);
-
-      for (let i = 1; i < array.length; i++) {
-        highlightLine(2); await checkPaused();
-
-        let key = array[i];
-        let j = i - 1;
-
-        highlightLine(3);
-        resetBars();
-        highlightBars([i], 'swap'); // Highlight key being moved
-        explanation.innerText = `Selected key: ${key}`;
-        await sleep(speed);
-
-        highlightLine(5);
-        while (j >= 0 && array[j] > key) {
-          await checkPaused();
-          resetBars();
-          highlightBars([j, j + 1], 'compare'); // Show comparison
-
-          explanation.innerText = `${array[j]} > ${key}, shifting right.`;
-          setMascot('swap');
-
-          highlightLine(6);
-          array[j + 1] = array[j];
-          updateHeight(j + 1, array[j]); // Visual shift
-          markSorted(j + 1); // It enters the sorted partition
-          await sleep(speed);
-
-          j = j - 1;
-        }
-        highlightLine(8);
-        array[j + 1] = key;
-        updateHeight(j + 1, key); // Place key
-        markSorted(j + 1);
-        await sleep(speed);
-
-        // Refresh sorted status for 0..i
-        for (let x = 0; x <= i; x++) markSorted(x);
-      }
+    const mascotData = {
+        idle: { char: "🧙‍♂️", phrases: ["Magic time!", "Ready to cast!", "Observe..."] },
+        compare: { char: "👀", phrases: ["Analysing...", "Which is bigger?"] },
+        swap: { char: "✨", phrases: ["Swish and Flick!", "Transform!", "Switch!"] },
+        sorted: { char: "🎉", phrases: ["Magical!", "Perfection!", "Sorted!"] }
     }
 
-    // --- Selection Sort ---
-    async function selectionSort() {
-      highlightLine(1);
-      for (let i = 0; i < array.length; i++) {
-        highlightLine(2);
-        let minIdx = i;
-        highlightLine(3);
-
-        for (let j = i + 1; j < array.length; j++) {
-          highlightLine(4); await checkPaused();
-
-          resetBars();
-          highlightBars([i], 'swap'); // Current sort position
-          highlightBars([minIdx], 'sorted'); // Current min found
-          highlightBars([j], 'compare'); // Comparing
-
-          explanation.innerText = `Looking for minimum...`;
-
-          highlightLine(5);
-          if (array[j] < array[minIdx]) {
-            minIdx = j;
-            highlightBars([minIdx], 'swap'); // Found new min
-            highlightLine(6);
-            setMascot('compare');
-            explanation.innerText = `Found new minimum: ${array[j]}`;
-            await sleep(speed);
-          }
-          await sleep(speed / 2);
-        }
-
-        if (minIdx !== i) {
-          highlightLine(7);
-          setMascot('swap');
-          explanation.innerText = `Swapping ${array[i]} with min ${array[minIdx]}`;
-          let temp = array[i];
-          array[i] = array[minIdx];
-          array[minIdx] = temp;
-          swapBars(i, minIdx);
-          await sleep(speed);
-        }
-        markSorted(i);
-      }
+    function setMascot(state, overrideText) {
+        const data = mascotData[state] || mascotData.idle;
+        mascotChar.innerText = data.char;
+        mascotBubble.innerText = overrideText || data.phrases[Math.floor(Math.random()*data.phrases.length)];
+        mascotBubble.classList.add('show');
+        
+        // Auto hide after 2s if playing
+        // setTimeout(() => mascotBubble.classList.remove('show'), 2000);
     }
-
-    // --- Quick Sort Helpers ---
-    async function startQuickSort() {
-      await quickSort(0, array.length - 1);
-    }
-
-    async function quickSort(low, high) {
-      if (low < high) {
-        highlightLine(2);
-        let pi = await partition(low, high);
-        await quickSort(low, pi - 1);
-        await quickSort(pi + 1, high);
-      } else if (low >= 0 && high >= 0 && low === high) {
-        markSorted(low);
-      }
-    }
-
-    async function partition(low, high) {
-      highlightLine(4);
-      let pivot = array[high];
-
-      let i = low - 1;
-      highlightLine(5);
-
-      for (let j = low; j < high; j++) {
-        highlightLine(6); await checkPaused();
-
-        resetBars();
-        highlightBars([high], 'swap'); // Pivot
-        highlightBars([j], 'compare');
-        if (i >= low) highlightBars([i], 'sorted'); // Smaller elements boundary
-
-        highlightLine(7);
-        if (array[j] <= pivot) {
-          i++;
-          highlightLine(8);
-          highlightLine(9);
-          setMascot('swap');
-
-          [array[i], array[j]] = [array[j], array[i]];
-          swapBars(i, j);
-          await sleep(speed);
-        }
-      }
-      highlightLine(10);
-      [array[i + 1], array[high]] = [array[high], array[i + 1]];
-      swapBars(i + 1, high);
-      markSorted(i + 1); // Pivot is now sorted
-      await sleep(speed);
-
-      return i + 1;
-    }
-
-    // --- Merge Sort Helpers ---
-    async function startMergeSort() {
-      await mergeSortHelper(0, array.length - 1);
-    }
-
-    async function mergeSortHelper(left, right) {
-      if (left >= right) return;
-      const mid = Math.floor((left + right) / 2);
-      await mergeSortHelper(left, mid);
-      await mergeSortHelper(mid + 1, right);
-      await merge(left, mid, right);
-    }
-
-    async function merge(left, mid, right) {
-      let n1 = mid - left + 1;
-      let n2 = right - mid;
-      let L = new Array(n1);
-      let R = new Array(n2);
-
-      for (let i = 0; i < n1; i++) L[i] = array[left + i];
-      for (let j = 0; j < n2; j++) R[j] = array[mid + 1 + j];
-
-      let i = 0, j = 0, k = left;
-
-      while (i < n1 && j < n2) {
-        await checkPaused();
-        highlightLine(5);
-        resetBars();
-        highlightBars([left + i, mid + 1 + j], 'compare'); // Source indices relative validation is tricky here as we modified array
-        // Visual simplification: Highlight target K
-        highlightBars([k], 'swap');
-
-        await sleep(speed);
-
-        highlightLine(6);
-        if (L[i] <= R[j]) {
-          highlightLine(7);
-          array[k] = L[i];
-          i++;
-        } else {
-          highlightLine(9);
-          highlightLine(10);
-          array[k] = R[j];
-          j++;
-        }
-        updateHeight(k, array[k]);
-        markSorted(k); // Mark merged part as sorted
-        k++;
-        await sleep(speed);
-      }
-
-      while (i < n1) {
-        array[k] = L[i];
-        updateHeight(k, array[k]);
-        markSorted(k);
-        i++; k++;
-        await sleep(speed / 2);
-      }
-      while (j < n2) {
-        array[k] = R[j];
-        updateHeight(k, array[k]);
-        markSorted(k);
-        j++; k++;
-        await sleep(speed / 2);
-      }
-    }
-
-    // Start
-    init();
 
   </script>
 </body>
