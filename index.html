@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sort Visualizer - Python Edition</title>
-  
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Fredoka:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Fredoka:wght@400;600&family=Press+Start+2P&display=swap"
+    rel="stylesheet">
 
   <style>
     :root {
@@ -32,7 +35,7 @@
       background-color: var(--bg-color);
       color: var(--text-main);
       background-image: radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.1) 0%, transparent 20%),
-                        radial-gradient(circle at 90% 80%, rgba(210, 168, 255, 0.1) 0%, transparent 20%);
+        radial-gradient(circle at 90% 80%, rgba(210, 168, 255, 0.1) 0%, transparent 20%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -41,45 +44,53 @@
 
     /* --- Mascot --- */
     #mascot-container {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        display: flex;
-        align-items: flex-end;
-        gap: 10px;
-        z-index: 100;
-        pointer-events: none; /* Let clicks pass through */
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      z-index: 100;
+      pointer-events: none;
+      /* Let clicks pass through */
     }
 
     #mascot-bubble {
-        background: white;
-        color: #333;
-        padding: 15px;
-        border-radius: 20px 20px 0 20px;
-        font-family: 'Press Start 2P', cursive;
-        font-size: 12px;
-        line-height: 1.5;
-        max-width: 250px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.3s, transform 0.3s;
+      background: white;
+      color: #333;
+      padding: 15px;
+      border-radius: 20px 20px 0 20px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      line-height: 1.5;
+      max-width: 250px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s;
     }
 
     #mascot-bubble.show {
-        opacity: 1;
-        transform: translateY(0);
+      opacity: 1;
+      transform: translateY(0);
     }
 
     #mascot-char {
-        font-size: 60px;
-        filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
-        animation: float 3s ease-in-out infinite;
+      font-size: 60px;
+      filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
+      animation: float 3s ease-in-out infinite;
     }
 
     @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
     }
 
 
@@ -176,7 +187,8 @@
     /* --- Array Bars --- */
     #array-container {
       display: flex;
-      align-items: flex-end; /* Align bars to bottom */
+      align-items: flex-end;
+      /* Align bars to bottom */
       justify-content: center;
       height: 300px;
       width: 100%;
@@ -190,7 +202,7 @@
       background-color: var(--bar-default);
       transition: height 0.2s ease, background-color 0.2s;
       border-radius: 4px 4px 0 0;
-      box-shadow: 0 0 5px var(--bar-default); 
+      box-shadow: 0 0 5px var(--bar-default);
       /* No text inside bars to keep it clean, can add tooltip if needed */
     }
 
@@ -241,19 +253,19 @@
       color: var(--text-main);
       min-height: 50px;
     }
-    
-    /* Decoration */
-    .logo-img { 
-        width: 60px; 
-        height: auto; 
-        vertical-align: middle;
-        margin-right: 15px;
-        border-radius: 50%;
-        border: 2px solid var(--accent-color);
-    }
 
+    /* Decoration */
+    .logo-img {
+      width: 60px;
+      height: auto;
+      vertical-align: middle;
+      margin-right: 15px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-color);
+    }
   </style>
 </head>
+
 <body>
 
   <h1>
@@ -269,11 +281,11 @@
       <option value="merge">Merge Sort</option>
       <option value="quick">Quick Sort</option>
     </select>
-    
+
     <button class="control-btn" onclick="generateArray()">Randomize 🎲</button>
     <button class="control-btn" onclick="startSort()">Start ✨</button>
     <button class="control-btn" onclick="togglePause()">Pause ⏸️</button>
-    
+
     <div style="display: flex; align-items: center; gap: 10px; margin-left: 20px;">
       <span style="font-family: 'Press Start 2P'; font-size: 10px;">SPEED</span>
       <input type="range" id="speed" min="50" max="800" value="300" oninput="updateSpeed()">
@@ -287,15 +299,16 @@
     </div>
 
     <div id="code-panel-container" class="glass-panel">
-      <h3 style="margin-top:0; color: var(--accent-color); font-family: 'Press Start 2P'; font-size: 14px;">PYTHON CODE</h3>
+      <h3 style="margin-top:0; color: var(--accent-color); font-family: 'Press Start 2P'; font-size: 14px;">PYTHON CODE
+      </h3>
       <div id="code-display"></div>
     </div>
   </div>
 
   <!-- Animated Mascot -->
   <div id="mascot-container">
-      <div id="mascot-bubble">Hello! I'm PyBot. I'll help you sort!</div>
-      <div id="mascot-char">🤖</div>
+    <div id="mascot-bubble">Hello! I'm PyBot. I'll help you sort!</div>
+    <div id="mascot-char">🤖</div>
   </div>
 
   <script>
@@ -304,7 +317,6 @@
     let isSorting = false;
     let isPaused = false;
     let speed = 300;
-    let abortController = null; // To stop async functions
 
     /* --- DOM Elements --- */
     const container = document.getElementById('array-container');
@@ -315,16 +327,16 @@
 
     /* --- Python Code Snippets --- */
     const codeSnippets = {
-      bubble: 
-`def bubble_sort(arr):
+      bubble:
+        `def bubble_sort(arr):
     n = len(arr)
     for i in range(n - 1):
         for j in range(n - i - 1):
             if arr[j] > arr[j + 1]:
                 arr[j], arr[j + 1] = arr[j + 1], arr[j]`,
-      
+
       insertion:
-`def insertion_sort(arr):
+        `def insertion_sort(arr):
     for i in range(1, len(arr)):
         key = arr[i]
         j = i - 1
@@ -334,7 +346,7 @@
         arr[j + 1] = key`,
 
       selection:
-`def selection_sort(arr):
+        `def selection_sort(arr):
     for i in range(len(arr)):
         min_idx = i
         for j in range(i + 1, len(arr)):
@@ -343,7 +355,7 @@
         arr[i], arr[min_idx] = arr[min_idx], arr[i]`,
 
       merge:
-`def merge_sort(left, right):
+        `def merge_sort(left, right):
     # This visualizer shows the merge step
     result = []
     i = j = 0
@@ -358,7 +370,7 @@
     result.extend(right[j:])`,
 
       quick:
-`def quick_sort(arr, low, high):
+        `def quick_sort(arr, low, high):
     if low < high:
         # Partition step
         pivot = arr[high]
@@ -372,422 +384,417 @@
 
     /* --- Mascot Logic --- */
     const mascotStates = {
-        idle: { char: "🤖", text: ["Ready to crunch data!", "Sort me up, Scotty!", "Python power!"] },
-        compare: { char: "🧐", text: ["Hmm, checking these two...", "Comparing...", "Which is bigger?"] },
-        swap: { char: "⚡", text: ["Zap! Swapping!", "Switcheroo!", "Moving data!"] },
-        sorted: { char: "🎉", text: ["All done!", "Perfectly sorted!", "Victory!"] }
+      idle: { char: "🤖", text: ["Ready to crunch data!", "Sort me up, Scotty!", "Python power!"] },
+      compare: { char: "🧐", text: ["Hmm, checking these two...", "Comparing...", "Which is bigger?"] },
+      swap: { char: "⚡", text: ["Zap! Swapping!", "Switcheroo!", "Moving data!"] },
+      sorted: { char: "🎉", text: ["All done!", "Perfectly sorted!", "Victory!"] }
     };
 
     function setMascot(stateKey) {
-        const state = mascotStates[stateKey];
-        mascotChar.innerText = state.char;
-        
-        // Random message
-        const text = state.text[Math.floor(Math.random() * state.text.length)];
-        mascotBubble.innerText = text;
+      const state = mascotStates[stateKey];
+      mascotChar.innerText = state.char;
+
+      // Random message
+      const text = state.text[Math.floor(Math.random() * state.text.length)];
+      mascotBubble.innerText = text;
+      mascotBubble.classList.add('show');
+
+      // Hide bubble after 2s if it's a transient state
+      if (stateKey === 'compare' || stateKey === 'swap') {
+        setTimeout(() => mascotBubble.classList.remove('show'), 1500);
+      } else {
         mascotBubble.classList.add('show');
-        
-        // Hide bubble after 2s if it's a transient state
-        if(stateKey === 'compare' || stateKey === 'swap') {
-             setTimeout(() => mascotBubble.classList.remove('show'), 1500);
-        } else {
-             mascotBubble.classList.add('show');
-        }
+      }
     }
 
     /* --- Initialization --- */
     function init() {
-        generateArray();
-        updateAlgo();
+      generateArray();
+      updateAlgo();
     }
 
-    function generateArray(size=20) {
-        if(isSorting) return; // Prevent generating while sorting
-        array = [];
-        container.innerHTML = '';
-        for (let i = 0; i < size; i++) {
-            const val = Math.floor(Math.random() * 80) + 10; // 10-90
-            array.push(val);
-            
-            const bar = document.createElement('div');
-            bar.classList.add('array-bar');
-            bar.style.height = \`\${val * 3}px\`;
-            
-            // Neon colors based on height
-            /* bar.style.backgroundColor = \`hsl(\${val * 3}, 70%, 50%)\`; */
-            
-            container.appendChild(bar);
-        }
-        setMascot('idle');
-        explanation.innerText = "Array generated with random values.";
+    function generateArray(size = 20) {
+      if (isSorting) return; // Prevent generating while sorting
+      array = [];
+      container.innerHTML = '';
+      for (let i = 0; i < size; i++) {
+        const val = Math.floor(Math.random() * 80) + 10; // 10-90
+        array.push(val);
+
+        const bar = document.createElement('div');
+        bar.classList.add('array-bar');
+        bar.style.height = (val * 3) + "px";
+
+        container.appendChild(bar);
+      }
+      setMascot('idle');
+      explanation.innerText = "Array generated with random values.";
+
+      // Clear logic highlights
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
     }
 
     function updateAlgo() {
-        const algo = document.getElementById('algo-select').value;
-        const code = codeSnippets[algo];
-        
-        // Render python code with line numbers
-        codeDisplay.innerHTML = '';
-        const lines = code.split('\\n');
-        lines.forEach((line, idx) => {
-            const lineDiv = document.createElement('div');
-            lineDiv.classList.add('code-line');
-            lineDiv.id = \`line-\${idx + 1}\`;
-            lineDiv.innerText = line; // Preserves whitespace via CSS pre
-            codeDisplay.appendChild(lineDiv);
-        });
+      const algo = document.getElementById('algo-select').value;
+      const code = codeSnippets[algo];
+
+      // Render python code with line numbers
+      codeDisplay.innerHTML = '';
+      const lines = code.split('\n');
+      lines.forEach((line, idx) => {
+        const lineDiv = document.createElement('div');
+        lineDiv.classList.add('code-line');
+        lineDiv.id = `line-${idx + 1}`;
+        lineDiv.innerText = line; // Preserves whitespace via CSS pre
+        codeDisplay.appendChild(lineDiv);
+      });
     }
 
     /* --- Visualization Helpers --- */
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     async function checkPaused() {
-        while (isPaused) {
-            await sleep(100);
-        }
+      while (isPaused) {
+        await sleep(100);
+      }
     }
 
     function highlightLine(lineNum) {
-        // Clear previous
-        document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
-        if (lineNum > 0) {
-            const el = document.getElementById(\`line-\${lineNum}\`);
-            if (el) el.classList.add('active');
-        }
+      // Clear previous
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      if (lineNum > 0) {
+        const el = document.getElementById(`line-${lineNum}`);
+        if (el) el.classList.add('active');
+      }
     }
 
     function highlightBars(indices, className) {
-        const bars = document.getElementsByClassName('array-bar');
-        indices.forEach(idx => {
-            if(bars[idx]) bars[idx].classList.add(className);
-        });
+      const bars = document.getElementsByClassName('array-bar');
+      indices.forEach(idx => {
+        if (bars[idx]) {
+          // Remove other logic states but keep sorted
+          bars[idx].classList.remove('compare', 'swap');
+          bars[idx].classList.add(className);
+        }
+      });
     }
 
+    // New reset: clears compare/swap but KEEPS 'sorted' state
     function resetBars() {
-        const bars = document.getElementsByClassName('array-bar');
-        for (let bar of bars) {
-            bar.className = 'array-bar';
-        }
+      const bars = document.getElementsByClassName('array-bar');
+      for (let bar of bars) {
+        bar.classList.remove('compare', 'swap');
+      }
+    }
+
+    function markSorted(index) {
+      const bars = document.getElementsByClassName('array-bar');
+      if (bars[index]) {
+        bars[index].classList.add('sorted');
+        bars[index].classList.remove('compare', 'swap');
+      }
     }
 
     function swapBars(i, j) {
-        const bars = document.getElementsByClassName('array-bar');
+      const bars = document.getElementsByClassName('array-bar');
+      if (bars[i] && bars[j]) {
         const h1 = bars[i].style.height;
         bars[i].style.height = bars[j].style.height;
         bars[j].style.height = h1;
+      }
     }
 
     function updateHeight(i, val) {
-        const bars = document.getElementsByClassName('array-bar');
-        if(bars[i]) bars[i].style.height = \`\${val * 3}px\`;
+      const bars = document.getElementsByClassName('array-bar');
+      if (bars[i]) bars[i].style.height = `${val * 3}px`;
     }
 
     function updateSpeed() {
-        const val = document.getElementById('speed').value;
-        speed = 1000 - val; // Invert: High value = fast = low ms
+      const val = document.getElementById('speed').value;
+      speed = 1000 - val; // Invert: High value = fast = low ms
     }
 
     function togglePause() {
-        isPaused = !isPaused;
-        document.querySelector('button[onclick="togglePause()"]').innerText = isPaused ? "Resume ▶️" : "Pause ⏸️";
+      isPaused = !isPaused;
+      document.querySelector('button[onclick="togglePause()"]').innerText = isPaused ? "Resume ▶️" : "Pause ⏸️";
     }
 
     /* --- Sort Algorithms --- */
 
     async function startSort() {
-        if (isSorting) return;
-        isSorting = true;
-        setMascot('idle');
-        const algo = document.getElementById('algo-select').value;
-        
-        try {
-            if (algo === 'bubble') await bubbleSort();
-            if (algo === 'insertion') await insertionSort();
-            if (algo === 'selection') await selectionSort();
-            if (algo === 'quick') await startQuickSort();
-            if (algo === 'merge') await startMergeSort();
-            
-            // Finish
-            highlightLine(0);
-            resetBars();
-            const bars = document.getElementsByClassName('array-bar');
-            for(let bar of bars) bar.classList.add('sorted');
-            setMascot('sorted');
-            explanation.innerText = "Sort Complete!";
-        } catch (e) {
-            console.log("Sort interrupted", e);
-        } finally {
-            isSorting = false;
-        }
+      if (isSorting) return;
+      isSorting = true;
+      setMascot('idle');
+      const algo = document.getElementById('algo-select').value;
+
+      try {
+        if (algo === 'bubble') await bubbleSort();
+        if (algo === 'insertion') await insertionSort();
+        if (algo === 'selection') await selectionSort();
+        if (algo === 'quick') await startQuickSort();
+        if (algo === 'merge') await startMergeSort();
+
+        // Finish
+        highlightLine(0);
+        resetBars();
+        const bars = document.getElementsByClassName('array-bar');
+        for (let bar of bars) bar.classList.add('sorted');
+        setMascot('sorted');
+        explanation.innerText = "Sort Complete!";
+      } catch (e) {
+        console.log("Sort interrupted", e);
+      } finally {
+        isSorting = false;
+      }
     }
 
     // --- Bubble Sort ---
-    // 1: def bubble...
-    // 2:    n = len...
-    // 3:    for i...
-    // 4:        for j...
-    // 5:            if arr[j] > arr[j + 1]:
-    // 6:                arr[j], arr[j + 1]...
     async function bubbleSort() {
-        const n = array.length;
-        highlightLine(1); await sleep(speed);
-        
-        for (let i = 0; i < n - 1; i++) {
-            highlightLine(3); 
-            await checkPaused();
+      const n = array.length;
+      highlightLine(1); await sleep(speed);
 
-            for (let j = 0; j < n - i - 1; j++) {
-                highlightLine(4);
-                resetBars();
-                highlightBars([j, j+1], 'compare');
-                setMascot('compare');
-                explanation.innerText = \`Comparing \${array[j]} and \${array[j+1]}\`;
-                await sleep(speed);
-                await checkPaused();
+      for (let i = 0; i < n - 1; i++) {
+        highlightLine(3);
+        await checkPaused();
 
-                highlightLine(5);
-                if (array[j] > array[j + 1]) {
-                    explanation.innerText = \`\${array[j]} > \${array[j+1]}, swapping!\`;
-                    setMascot('swap');
-                    highlightBars([j, j+1], 'swap');
-                    
-                    highlightLine(6);
-                    // Swap data
-                    let temp = array[j];
-                    array[j] = array[j+1];
-                    array[j+1] = temp;
-                    // Swap Visuals
-                    swapBars(j, j+1);
-                    await sleep(speed);
-                }
-            }
+        for (let j = 0; j < n - i - 1; j++) {
+          highlightLine(4);
+          resetBars();
+          highlightBars([j, j + 1], 'compare');
+          setMascot('compare');
+          explanation.innerText = `Comparing ${array[j]} and ${array[j + 1]}`;
+          await sleep(speed);
+          await checkPaused();
+
+          highlightLine(5);
+          if (array[j] > array[j + 1]) {
+            explanation.innerText = `${array[j]} > ${array[j + 1]}, swapping!`;
+            setMascot('swap');
+            highlightBars([j, j + 1], 'swap');
+
+            highlightLine(6);
+            // Swap data
+            let temp = array[j];
+            array[j] = array[j + 1];
+            array[j + 1] = temp;
+            // Swap Visuals
+            swapBars(j, j + 1);
+            await sleep(speed);
+          }
         }
+        // Mark end as sorted
+        markSorted(n - 1 - i);
+      }
+      markSorted(0); // Last one
     }
 
     // --- Insertion Sort ---
-    // 1: def insertion...
-    // 2:    for i in range(1...
-    // 3:        key = arr[i]
-    // 4:        j = i - 1
-    // 5:        while j >= 0...
-    // 6:            arr[j + 1] = arr[j]
-    // 7:            j -= 1
-    // 8:        arr[j + 1] = key
     async function insertionSort() {
-        highlightLine(1); await sleep(speed);
-        for (let i = 1; i < array.length; i++) {
-            highlightLine(2); await checkPaused();
-            
-            let key = array[i];
-            let j = i - 1;
-            
-            highlightLine(3);
-            resetBars();
-            highlightBars([i], 'compare'); // Highlight key
-            explanation.innerText = \`Selected key: \${key}\`;
-            await sleep(speed);
+      highlightLine(1); await sleep(speed);
+      // Mark first as implicitly sorted
+      markSorted(0);
 
-            highlightLine(5);
-            while (j >= 0 && array[j] > key) {
-                await checkPaused();
-                highlightBars([j], 'compare');
-                explanation.innerText = \`\${array[j]} > \${key}, shifting right.\`;
-                setMascot('swap');
+      for (let i = 1; i < array.length; i++) {
+        highlightLine(2); await checkPaused();
 
-                highlightLine(6);
-                array[j + 1] = array[j];
-                updateHeight(j + 1, array[j]); // Visual shift
-                await sleep(speed);
-                
-                j = j - 1;
-            }
-            highlightLine(8);
-            array[j + 1] = key;
-            updateHeight(j + 1, key); // Place key
-            await sleep(speed);
+        let key = array[i];
+        let j = i - 1;
+
+        highlightLine(3);
+        resetBars();
+        highlightBars([i], 'swap'); // Highlight key being moved
+        explanation.innerText = `Selected key: ${key}`;
+        await sleep(speed);
+
+        highlightLine(5);
+        while (j >= 0 && array[j] > key) {
+          await checkPaused();
+          resetBars();
+          highlightBars([j, j + 1], 'compare'); // Show comparison
+
+          explanation.innerText = `${array[j]} > ${key}, shifting right.`;
+          setMascot('swap');
+
+          highlightLine(6);
+          array[j + 1] = array[j];
+          updateHeight(j + 1, array[j]); // Visual shift
+          markSorted(j + 1); // It enters the sorted partition
+          await sleep(speed);
+
+          j = j - 1;
         }
+        highlightLine(8);
+        array[j + 1] = key;
+        updateHeight(j + 1, key); // Place key
+        markSorted(j + 1);
+        await sleep(speed);
+
+        // Refresh sorted status for 0..i
+        for (let x = 0; x <= i; x++) markSorted(x);
+      }
     }
 
     // --- Selection Sort ---
-    // 1: def select...
-    // 2:    for i...
-    // 3:        min_idx = i
-    // 4:        for j...
-    // 5:            if arr[j] < arr[min_idx]:
-    // 6:                min_idx = j
-    // 7:        arr[i], arr...
     async function selectionSort() {
-        highlightLine(1);
-        for (let i = 0; i < array.length; i++) {
-            highlightLine(2); 
-            let minIdx = i;
-            highlightLine(3);
-            resetBars();
-            highlightBars([i], 'sorted'); // Current position
+      highlightLine(1);
+      for (let i = 0; i < array.length; i++) {
+        highlightLine(2);
+        let minIdx = i;
+        highlightLine(3);
 
-            for (let j = i + 1; j < array.length; j++) {
-                highlightLine(4); await checkPaused();
-                highlightBars([j], 'compare');
-                explanation.innerText = \`Looking for minimum...\`;
-                
-                highlightLine(5);
-                if (array[j] < array[minIdx]) {
-                    // Unmark old min
-                    if(minIdx !== i) highlightBars([minIdx], 'array-bar'); // hacky reset
-                    
-                    minIdx = j;
-                    highlightBars([minIdx], 'swap'); // Found new min
-                    highlightLine(6);
-                    setMascot('compare');
-                    explanation.innerText = \`Found new minimum: \${array[j]}\`;
-                    await sleep(speed);
-                } else {
-                    // Reset non-min bar
-                    // const bars = document.getElementsByClassName('array-bar');
-                    // if(j !== minIdx) bars[j].className = 'array-bar';
-                }
-                await sleep(speed/2);
-            }
-            
-            if (minIdx !== i) {
-                highlightLine(7);
-                setMascot('swap');
-                explanation.innerText = \`Swapping \${array[i]} with min \${array[minIdx]}\`;
-                let temp = array[i];
-                array[i] = array[minIdx];
-                array[minIdx] = temp;
-                swapBars(i, minIdx);
-                await sleep(speed);
-            }
+        for (let j = i + 1; j < array.length; j++) {
+          highlightLine(4); await checkPaused();
+
+          resetBars();
+          highlightBars([i], 'swap'); // Current sort position
+          highlightBars([minIdx], 'sorted'); // Current min found
+          highlightBars([j], 'compare'); // Comparing
+
+          explanation.innerText = `Looking for minimum...`;
+
+          highlightLine(5);
+          if (array[j] < array[minIdx]) {
+            minIdx = j;
+            highlightBars([minIdx], 'swap'); // Found new min
+            highlightLine(6);
+            setMascot('compare');
+            explanation.innerText = `Found new minimum: ${array[j]}`;
+            await sleep(speed);
+          }
+          await sleep(speed / 2);
         }
+
+        if (minIdx !== i) {
+          highlightLine(7);
+          setMascot('swap');
+          explanation.innerText = `Swapping ${array[i]} with min ${array[minIdx]}`;
+          let temp = array[i];
+          array[i] = array[minIdx];
+          array[minIdx] = temp;
+          swapBars(i, minIdx);
+          await sleep(speed);
+        }
+        markSorted(i);
+      }
     }
 
     // --- Quick Sort Helpers ---
     async function startQuickSort() {
-        await quickSort(0, array.length - 1);
+      await quickSort(0, array.length - 1);
     }
 
-    // 1: def quick...
-    // 2:    if low < high:
-    // 3:        # Partition
-    // 4:        pivot = arr[high]
-    // 5:        i = low - 1
-    // 6:        for j in range...
-    // 7:            if arr[j] <= pivot:
-    // 8:                i += 1
-    // 9:                arr[i], arr[j]...
-    // 10:       arr[i+1], arr[high]...
     async function quickSort(low, high) {
-         if (low < high) {
-            highlightLine(2);
-            let pi = await partition(low, high);
-            await quickSort(low, pi - 1);
-            await quickSort(pi + 1, high);
-         }
+      if (low < high) {
+        highlightLine(2);
+        let pi = await partition(low, high);
+        await quickSort(low, pi - 1);
+        await quickSort(pi + 1, high);
+      } else if (low >= 0 && high >= 0 && low === high) {
+        markSorted(low);
+      }
     }
 
     async function partition(low, high) {
-        highlightLine(4);
-        let pivot = array[high];
-        highlightBars([high], 'swap'); // Pivot is red
-        explanation.innerText = \`Pivot is \${pivot}\`;
-        
-        let i = low - 1;
-        highlightLine(5);
-        
-        for (let j = low; j < high; j++) {
-            highlightLine(6); await checkPaused();
-            resetBars();
-            highlightBars([high], 'swap'); // Keep pivot highlighted
-            highlightBars([j], 'compare');
-            
-            highlightLine(7);
-            if (array[j] <= pivot) {
-                i++;
-                highlightLine(8);
-                highlightLine(9);
-                setMascot('swap');
-                
-                [array[i], array[j]] = [array[j], array[i]];
-                swapBars(i, j);
-                await sleep(speed);
-            }
+      highlightLine(4);
+      let pivot = array[high];
+
+      let i = low - 1;
+      highlightLine(5);
+
+      for (let j = low; j < high; j++) {
+        highlightLine(6); await checkPaused();
+
+        resetBars();
+        highlightBars([high], 'swap'); // Pivot
+        highlightBars([j], 'compare');
+        if (i >= low) highlightBars([i], 'sorted'); // Smaller elements boundary
+
+        highlightLine(7);
+        if (array[j] <= pivot) {
+          i++;
+          highlightLine(8);
+          highlightLine(9);
+          setMascot('swap');
+
+          [array[i], array[j]] = [array[j], array[i]];
+          swapBars(i, j);
+          await sleep(speed);
         }
-        highlightLine(10);
-        [array[i + 1], array[high]] = [array[high], array[i + 1]];
-        swapBars(i + 1, high);
-        await sleep(speed);
-        
-        return i + 1;
+      }
+      highlightLine(10);
+      [array[i + 1], array[high]] = [array[high], array[i + 1]];
+      swapBars(i + 1, high);
+      markSorted(i + 1); // Pivot is now sorted
+      await sleep(speed);
+
+      return i + 1;
     }
 
     // --- Merge Sort Helpers ---
-    // Note: Merge sort in place visualization is tricky with the Python slice syntax shown.
-    // I will simulate the recursive merges visually on the main array.
     async function startMergeSort() {
-        await mergeSortHelper(0, array.length - 1);
+      await mergeSortHelper(0, array.length - 1);
     }
 
     async function mergeSortHelper(left, right) {
-        if (left >= right) return;
-        const mid = Math.floor((left + right) / 2);
-        await mergeSortHelper(left, mid);
-        await mergeSortHelper(mid + 1, right);
-        await merge(left, mid, right);
+      if (left >= right) return;
+      const mid = Math.floor((left + right) / 2);
+      await mergeSortHelper(left, mid);
+      await mergeSortHelper(mid + 1, right);
+      await merge(left, mid, right);
     }
 
     async function merge(left, mid, right) {
-        // Visualizing the Python 'merge' logic conceptually
-        let n1 = mid - left + 1;
-        let n2 = right - mid;
-        let L = new Array(n1);
-        let R = new Array(n2);
+      let n1 = mid - left + 1;
+      let n2 = right - mid;
+      let L = new Array(n1);
+      let R = new Array(n2);
 
-        for (let i = 0; i < n1; i++) L[i] = array[left + i];
-        for (let j = 0; j < n2; j++) R[j] = array[mid + 1 + j];
+      for (let i = 0; i < n1; i++) L[i] = array[left + i];
+      for (let j = 0; j < n2; j++) R[j] = array[mid + 1 + j];
 
-        let i = 0, j = 0, k = left;
-        
-        // Highlight Lines roughly corresponding to the merge loop
-        // 5: while i < len(left)...
-        // 6:     if left[i] < right[j]...
-        
-        while (i < n1 && j < n2) {
-            await checkPaused();
-            highlightLine(5);
-            resetBars();
-            highlightBars([left + i, mid + 1 + j], 'compare');
-            await sleep(speed);
+      let i = 0, j = 0, k = left;
 
-            highlightLine(6);
-            if (L[i] <= R[j]) {
-                highlightLine(7); // result.append(left[i])
-                array[k] = L[i];
-                i++;
-            } else {
-                highlightLine(9); // else
-                highlightLine(10); // result.append(right[j])
-                array[k] = R[j];
-                j++;
-            }
-            updateHeight(k, array[k]);
-            highlightBars([k], 'sorted');
-            k++;
-            await sleep(speed);
+      while (i < n1 && j < n2) {
+        await checkPaused();
+        highlightLine(5);
+        resetBars();
+        highlightBars([left + i, mid + 1 + j], 'compare'); // Source indices relative validation is tricky here as we modified array
+        // Visual simplification: Highlight target K
+        highlightBars([k], 'swap');
+
+        await sleep(speed);
+
+        highlightLine(6);
+        if (L[i] <= R[j]) {
+          highlightLine(7);
+          array[k] = L[i];
+          i++;
+        } else {
+          highlightLine(9);
+          highlightLine(10);
+          array[k] = R[j];
+          j++;
         }
+        updateHeight(k, array[k]);
+        markSorted(k); // Mark merged part as sorted
+        k++;
+        await sleep(speed);
+      }
 
-        while (i < n1) {
-            array[k] = L[i];
-            updateHeight(k, array[k]);
-            i++; k++;
-            await sleep(speed/2);
-        }
-        while (j < n2) {
-            array[k] = R[j];
-            updateHeight(k, array[k]);
-            j++; k++;
-            await sleep(speed/2);
-        }
+      while (i < n1) {
+        array[k] = L[i];
+        updateHeight(k, array[k]);
+        markSorted(k);
+        i++; k++;
+        await sleep(speed / 2);
+      }
+      while (j < n2) {
+        array[k] = R[j];
+        updateHeight(k, array[k]);
+        markSorted(k);
+        j++; k++;
+        await sleep(speed / 2);
+      }
     }
 
     // Start
@@ -795,4 +802,5 @@
 
   </script>
 </body>
+
 </html>
