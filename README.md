@@ -4,7 +4,7 @@ Built using HTML, CSS (inclusive), JAVASCRIPT (inclusive)
 Visit the site 👉 : https://kiteflies-ok.github.io/Sort-Visualizer/
 
 
-Uploading Video Project 1 (1).mp4…
+https://github.com/user-attachments/assets/e346b2ff-8db0-421f-b0f0-05d44d592024
 
 
 An interactive, friendly visualizer, sorting an array of elements through the following sorting algorithms:
