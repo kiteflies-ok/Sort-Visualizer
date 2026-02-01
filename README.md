@@ -3,6 +3,10 @@ Built using HTML, CSS (inclusive), JAVASCRIPT (inclusive)
 
 Visit the site 👉 : https://kiteflies-ok.github.io/Sort-Visualizer/
 
+
+Uploading Video Project 1 (1).mp4…
+
+
 An interactive, friendly visualizer, sorting an array of elements through the following sorting algorithms:
 1. Bubble Sort
 2. Insertion Sort
